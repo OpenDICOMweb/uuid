@@ -9,12 +9,11 @@ homepage: https://github.com/OpenDICOMweb/uid
 environment:
   sdk: '>=1.24.2 <2.0.0'
 
-dependencies:
- common:
-   path: C:/odw/sdk/common
-   version: ^0.6.0
+#dependencies:
 
 dev_dependencies:
+  common:
+    path: C:/odw/sdk/common
   benchmark_harness: ^1.0.4
   grinder: ^0.8.0
   test:  ^0.12.0
