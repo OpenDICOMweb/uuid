@@ -12,5 +12,4 @@ TODO:
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-FIX:
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/OpenDICOMweb/sdk/issues
