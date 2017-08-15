@@ -4,12 +4,15 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'package:common/logger.dart';
+import 'package:system/system.dart';
 import 'package:uuid/uuid.dart';
 
-final Logger log = new Logger('uuid_test');
 
+
+//Urgent: test invalidUuidError
+//Urgent: test wrong List length, both too few and too many.
 void main() {
+  System.log.level = Level.debug2;
 
   for (int i = 0; i < 1000; i++) {
     Uuid uuid = new Uuid();
@@ -17,9 +20,10 @@ void main() {
     log.debug('$i:');
     log.debug("  a:$uuid");
     uuid = new Uuid();
+    log.debug('isSecure: ${uuid.isSecure}');
     checkUuid(uuid);
     log.debug("  b:$uuid");
-    uuid = new Uuid(isSecure: true);
+    uuid = new Uuid();
     checkUuid(uuid);
     log.debug("  c:$uuid");
   }
@@ -40,4 +44,3 @@ void checkUuid(Uuid uuid) {
     log.debug("**** Uuid: $uuid");
   }
 }
-

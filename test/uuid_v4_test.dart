@@ -4,17 +4,16 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'package:common/logger.dart';
+import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import "package:test/test.dart";
 
 void main() {
   final log = new Logger('uuid_v4_test');
-
+  var generator = new V4Generator(isSecure: false, seed: 1);
   group('[Version 4 Tests]', () {
     test('Check if V4 is consistent using a static seed', () {
-      var generator = new UuidV4Generator(seed: 1);
-      var u0 = generator();
+      var u0 = generator.next;
       //  log.debug('u0: $u0');
       var u1 = [
         164,

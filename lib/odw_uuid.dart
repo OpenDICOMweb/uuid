@@ -5,12 +5,16 @@
 // See the AUTHORS file for other contributors.
 
 import 'src/errors.dart';
+import 'package:system/system.dart';
 
 export 'src/errors.dart';
 export 'src/uuid.dart';
 export 'src/v4generator.dart';
 
 Null invalidUuidError(Object uuid) {
-  throw new InvalidUuidError(uuid);
+  log.error(InvalidUuidError.message(uuid));
+  if (throwOnError) throw new InvalidUuidError(uuid);
   return null;
 }
+
+

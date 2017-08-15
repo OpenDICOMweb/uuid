@@ -4,12 +4,10 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'dart:typed_data';
-
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:uuid/uuid.dart';
 
-List<Uint8List> uuids;
+List<Uuid> uuids;
 List<String> strings;
 
 const int length = 1000;
@@ -19,7 +17,9 @@ class TemplateBenchmark extends BenchmarkBase {
   const TemplateBenchmark() : super("Template");
 
   static void main() {
-    new TemplateBenchmark().report();
+    Uuid.initialize(isSecure: false, seed: 1);
+    var report = new TemplateBenchmark().report();
+    print(report);
   }
 
   // The benchmark code.
@@ -33,13 +33,14 @@ class TemplateBenchmark extends BenchmarkBase {
   // Not measured: setup code executed before the benchmark runs.
   @override
   void setup() {
-    UuidV4Generator generator = new UuidV4Generator();
-    uuids = new List<Uint8List>(length);
+   Uuid.initialize(isSecure: false, seed: 0);
+    uuids = new List<Uuid>(length);
     strings = new List<String>(length);
     for (int i = 0; i < length; i++) {
-      uuids[i] = generator();
+      uuids[i] = new Uuid();
       strings[i] = uuids[i].toString();
     }
+//    print("Strings: $uuids");
   }
 
   // Not measured: teardown code executed after the benchmark runs.
