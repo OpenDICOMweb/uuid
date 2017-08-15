@@ -4,13 +4,6 @@
 // Original author: Jim Philbin <jfphilbin@gmail.edu> - 
 // See the AUTHORS file for other contributors.
 
-import 'src/errors.dart';
-
 export 'src/errors.dart';
 export 'src/uuid.dart';
 export 'src/v4generator.dart';
-
-Null invalidUuidError(Object uuid) {
-  throw new InvalidUuidError(uuid);
-  return null;
-}

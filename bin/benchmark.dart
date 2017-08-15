@@ -18,8 +18,7 @@ class TemplateBenchmark extends BenchmarkBase {
 
   static void main() {
     Uuid.initialize(isSecure: false, seed: 1);
-    var report = new TemplateBenchmark().report();
-    print(report);
+    new TemplateBenchmark().report();
   }
 
   // The benchmark code.

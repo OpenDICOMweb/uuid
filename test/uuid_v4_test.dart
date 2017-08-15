@@ -4,7 +4,7 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'package:logger/logger.dart';
+import 'package:system/system.dart';
 import 'package:uuid/uuid.dart';
 import "package:test/test.dart";
 

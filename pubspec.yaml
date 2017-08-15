@@ -1,6 +1,6 @@
 name: uuid
 description: DICOM UIDs
-version: 0.6.0
+version: 0.6.1
 
 author: Jim Philbin <mailto:jfphilbin@gmail.com>
 
@@ -10,9 +10,6 @@ environment:
   sdk: '>=1.24.2 <2.0.0'
 
 dependencies:
-  system:
-    path: C:/odw/sdk/system
-    version: ^0.6.0
   string:
     path: C:/odw/sdk/string
     version: ^0.6.0
@@ -20,4 +17,7 @@ dependencies:
 dev_dependencies:
   benchmark_harness: ^1.0.4
   grinder: ^0.8.0
+  system:
+    path: C:/odw/sdk/system
+    version: ^0.6.0
   test:  ^0.12.0
