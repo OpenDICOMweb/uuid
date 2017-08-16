@@ -16,5 +16,5 @@ dev_dependencies:
   grinder: ^0.8.0
   system:
     path: C:/odw/sdk/system
-    version: ^0.6.0
+    version: ^0.6.1
   test:  ^0.12.0

@@ -33,101 +33,77 @@ enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
 /// Use [UuidV4Generator] for more control over the RNG used.
 ///
 /// See https://api.dartlang.org/stable/dart-math/Random-class.html.
-class Uuid {
+class UuidBase {
   // static const int version = 4;
   static const int lengthInBytes = 16;
   static const int lengthAsString = 36;
   static const int lengthAsUidString = 32;
 
-  // The random number generator
-  static V4Generator __rng;
+  /// A random Version 4 [Uuid] generator.
+  // Interface instantiated by super class.
+  static V4Generator v4generator;
 
-  /// Set to [true] for uppercase hex characters.
-  static bool _useUppercase = false;
+  /// If [true] uppercase letters will be used when converting
+  /// [Uuid]s to [String]s; otherwise lowercase will be used.
+  static bool useUppercase = false;
 
-  /// A [Uint8List] 16 bytes long containing the [Uuid] value.
-  final Uint8List _bytes;
-
-  /// Constructs a Version 4 [Uuid]. If [isSecure] is [false],
-  /// it uses the [Random] RNG.  If [isSecure] is [true], it uses
-  /// the [Random.secure] RNG. The default is isSecure is [true].
-  Uuid([String uuid]) : _bytes = _maybeGetBytesFromString(uuid);
-
-  /// Constructs a Version 4 [Uuid] from a [List<int>] (including [Uint8List].
-  /// If the [List] has length that is not equal to 16 calls
-  /// [invalidUuidString].
-  // TODO: decide if the list is longer than 16, should it truncate at 16,
-  // TODO: i.e. it constructs the [Uuid] from [list.sublist(0, 16)].
-  Uuid.fromList(List<int> bytes) : _bytes = _listToBytes(bytes);
-
-  Uuid._(this._bytes);
-
-  static Uint8List _maybeGetBytesFromString([String s]) {
-    if (s == null) return _rng.next;
-    var bytes = _parseToBytes(s);
-    if (bytes == null) throw new InvalidUuidError(s);
-    return bytes;
-  }
-
-  /// Two [Uuid]s are [==] if they contain equivalent [_bytes].
+  /// Two [Uuid]s are [==] if they contain equivalent [data].
   @override
   bool operator ==(Object other) {
-    if (other is Uuid) {
+    if (other is UuidBase) {
       //TODO: This test is not strictly necessary. Remove it after testing
-      if (_bytes.length != other._bytes.length) return false;
+      if (data.length != other.data.length) return false;
       for (int i = 0; i < lengthInBytes; i++)
-        if (_bytes[i] != other._bytes[i]) return false;
+        if (data[i] != other.data[i]) return false;
       return true;
     }
     return false;
   }
 
-  /// If not already initialized, then do lazy initialization.
-  static V4Generator get _rng => __rng ??= initialize();
+  /// Returns the [Uint8List] containing the 16-byte [Uuid] data.
+  Uint8List get data;
+
+  /// Returns a [String] describing this [Uuid] [class].
+  String get type;
 
   /// Return the [Uint8List] containing the 16-byte [Uuid] data.
-  Uint8List get bytes => _bytes;
+ // Uint8List get bytes => data;
 
   // Returns an [UnmodifiableListView] of [bytes].
-  UnmodifiableListView<int> get value => new UnmodifiableListView(_bytes);
+  UnmodifiableListView<int> get value => new UnmodifiableListView(data);
 
   /// Returns the version number of [this].
-  int get version => _bytes[6] >> 4;
+  int get version => data[6] >> 4;
 
   /// Returns true if this is a random or pseudo-random [Uuid].
   bool get isRandom => version == 4;
 
   @override
-  int get hashCode => _bytes.hashCode;
+  int get hashCode => data.hashCode;
 
   /// Returns [true] if [this] is a valid Version 4 UUID, false otherwise.
-  bool get isValid => _isValidV4List(_bytes);
+  bool get isValid => _isValidV4List(data);
 
-  bool get isSecure => _rng.isSecure;
-
-  /// Returns a copy of [_bytes].
+  /// Returns a copy of [data].
   UnmodifiableListView<int> get asUint8List => value;
-
-  /// If [true] uppercase letters will be used when converting [Uuid]s
-  /// to [String]s.
-  bool get useUppercase => _useUppercase;
 
   /// Returns the [Uuid] as a [String] in UUID format.
   String get asString => toString();
 
-  /// Returns a hexadecimal [String] corresponding to [this].
+  /// Returns a hexadecimal [String] corresponding to [this], but without
+  /// the dashes ('-') that are present in the UUID format.
   String get asHex {
     var sb = new StringBuffer();
-    for (int i = 0; i < _bytes.length; i++)
-      sb.write(_bytes[i].toRadixString(16).padLeft(2, "0").toLowerCase());
+    for (int i = 0; i < data.length; i++)
+      sb.write(data[i].toRadixString(16).padLeft(2, "0").toLowerCase());
     return sb.toString();
   }
 
   // Variant returns UUID layout variant.
   UuidVariant get variant {
-    if ((_bytes[8] & 0x80) == 0x00) return UuidVariant.ncs;
-    if (((_bytes[8] & 0xc0) | 0x80) == 0x80) return UuidVariant.rfc4122;
-    if (((_bytes[8] & 0xe0) | 0xc0) == 0xc0) return UuidVariant.Microsoft;
+    if ((data[8] & 0x80) == 0x00) return UuidVariant.ncs;
+    if (((data[8] & 0xc0) | 0x80) == 0x80) return UuidVariant.rfc4122;
+    if (((data[8] & 0xe0) | 0xc0) == 0xc0) return UuidVariant.Microsoft;
     return UuidVariant.Microsoft;
   }
 
@@ -135,21 +111,7 @@ class Uuid {
   /// the hexadecimal characters are in lowercase; however, if
   /// [useUppercase] is [true] the returned [String] is in uppercase.
   @override
-  String toString() => _toUuidFormat(_bytes, 0, _useUppercase);
-
-/*
-  /// Returns a new random Uuid using the default generator.
-  static Uuid get random => new UuidBase();
-*/
-
-  //TODO: Should this return [null] or [throw] an error?
-  /// Parses a [String] in UUID format.  Returns the corresponding
-  /// UUID if valid; otherwise, returns [null].
-  static Uuid parse(String s, [Uint8List buffer, int offset = 0]) {
-    var bytes = _parseToBytes(s, buffer, offset);
-    if (bytes == null) throw new InvalidUuidError(s);
-    return new Uuid._(bytes);
-  }
+  String toString() => _toUuidFormat(data, 0, useUppercase);
 
   /// Returns [true] if [s] is a valid [Uuid] for [version]. If
   /// [version] is [null] returns [true] for any valid version.
@@ -164,15 +126,28 @@ class Uuid {
   static bool isValidData(List<int> data, [int version]) =>
       __isValidUuidData(data, version);
 
-  /// Manually initialize the RNG for UUIDs.
-  static void initialize({bool isSecure = true, int seed}) =>
-      _initialize(isSecure: isSecure, seed: seed);
+  static bool isNotValidData(List<int> data, [int version]) =>
+      !isValidData(data, version);
 
-  /// Used by both greedy and lazy initializers. Returns the RNG.
-  static V4Generator _initialize(
-      {bool isSecure = true, int seed, bool useUppercase = false}) {
-    __rng = new V4Generator(isSecure: isSecure, seed: seed);
-    return _rng;
+  //TODO: redoc
+  /// Parses [s], which must be in UUID format (see TODO:uuidRef),
+  /// and returns a [Uint8List] 16 bytes long containing the value
+  /// of the [Uuid]. If [s] is not valid [null] is returned.
+  static Uint8List parseToBytes(String s, [Uint8List buffer, int offset = 0]) =>
+      _parseToBytes;
+
+  /// Returns a Uuid created from [s], if [s] is a valid Uuid in [String]
+  /// format; otherwise, if [onError] is not [null] calls [onError]([s])
+  /// and returns its value. If [onError] is [null], then a
+  /// [InvalidUuidError] is thrown.
+  static UuidBase parse(String s, {UuidBase Function(String) onError}) {
+    var bytes = parseToBytes(s);
+    if (bytes == null) {
+      if (onError != null) return onError(s);
+    } else {
+      throw new InvalidUuidError(s);
+    }
+    return bytes;
   }
 }
 // **** Internal Procedures ****
@@ -301,7 +276,7 @@ Uuid _parse(String s, {Null Function(Uuid) onError}) {
 }
 
 
-/// Parses the provided [uuid] [String] into a list of byte values.
+/// Parses the [String] [s] into a list of byte values.
 /// Can optionally be provided a [Uint8List] to write into and
 /// a positional [offset] for where to start inputting into the buffer.
 Uint8List _parseToBytes(String s, [Uint8List list, int offset = 0]) {
@@ -325,6 +300,19 @@ Uint8List _parseToBytes(String s, [Uint8List list, int offset = 0]) {
     return null;
   }
   return bytes;
+}
+
+/// Parses the [String] [s] into a list of byte values.
+/// Can optionally be provided a [Uint8List] to write into and
+/// a positional [offset] for where to start inputting into the buffer.
+Uint8List _parseDicomToBytes(String s, [Uint8List list, int offset = 0]) {
+  Uint8List bytes =
+  (list != null) ? list.buffer.asUint8List(offset, 16) : new Uint8List(16);
+
+  //Urgent What to do here? Should all parser have an OnError argument.
+  if (s == null, || s.length != 32 || !isHexString(s)) return null;
+  //TODO: add to string package
+  return string.toHex(s);
 }
 
 
@@ -864,6 +852,7 @@ const List<String> _byteToUppercaseHex = const [
   "ff"
 ];
 
+//Urgent: add to string package
 // Urgent: reformat into 6 columns
 /// Returns the 8-bit [int] equivalent to the Hex [String].
 const Map<String, int> _hexToByte = const {

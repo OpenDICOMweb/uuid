@@ -5,9 +5,7 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:system/system.dart';
-import 'package:uuid/uuid.dart';
-
-
+import 'package:uuid/uuid_basic.dart';
 
 //Urgent: test invalidUuidError
 //Urgent: test wrong List length, both too few and too many.
@@ -20,7 +18,7 @@ void main() {
     log.debug('$i:');
     log.debug("  a:$uuid");
     uuid = new Uuid();
-    log.debug('isSecure: ${uuid.isSecure}');
+    log.debug('isSecure: ${Uuid.isSecure}');
     checkUuid(uuid);
     log.debug("  b:$uuid");
     uuid = new Uuid();

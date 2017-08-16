@@ -5,63 +5,40 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:system/system.dart';
-import 'package:uuid/uuid.dart';
 import "package:test/test.dart";
 
+import 'package:uuid/uuid_test.dart';
+
 void main() {
-  final log = new Logger('uuid_v4_test');
-  var generator = new V4Generator(isSecure: false, seed: 1);
+
   group('[Version 4 Tests]', () {
     test('Check if V4 is consistent using a static seed', () {
-      var u0 = generator.next;
+      var uuid0 = new Uuid();
+      var data0 = uuid0.data;
       //  log.debug('u0: $u0');
-      var u1 = [
-        164,
-        98,
-        80,
-        42,
-        115,
-        175,
-        67,
-        65,
-        191,
-        196,
-        5,
-        149,
-        123,
-        112,
-        48,
-        221
+      var data1 = [
+        164, 98, 80, 42, 115, 175, 67, 65,
+        191, 196, 5, 149, 123, 112, 48, 221 // No reformat
       ];
-      expect(u0, equals(u1));
-      expect(u1.length, equals(16));
+      expect(data0.length, equals(16));
+      expect(data1.length, equals(16));
+      expect(data0, equals(data1));
+
     });
 
     test('Test Uuid.fromBytes', () {
-      List<int> bytes = [
-        0x10,
-        0x91,
-        0x56,
-        0xbe,
-        0xc4,
-        0xfb,
-        0xc1,
-        0xea,
-        0x71,
-        0xb4,
-        0xef,
-        0xe1,
-        0x67,
-        0x1c,
-        0x58,
-        0x36
+      const List<int> data0 = const <int>[
+        0x10, 0x91, 0x56, 0xbe, 0xc4, 0xfb, 0xc1, 0xea,
+        0x71, 0xb4, 0xef, 0xe1, 0x67, 0x1c, 0x58, 0x36 // No Reformat
       ];
-      log.debug('bytes: $bytes');
-      Uuid u0 = new Uuid.fromList(bytes);
-      var u1 = "109156be-c4fb-41ea-b1b4-efe1671c5836";
-      log.debug('u0: $u0');
-      log.debug('u1: $u1');
-      expect(u0.toString(), equals(u1));
+      const String string0 = "109156be-c4fb-41ea-b1b4-efe1671c5836";
+
+      log.debug('data0: $data0');
+      Uuid uuid0 = new Uuid.fromList(data0);
+
+      log.debug('  uuid0: $uuid0');
+      log.debug('string0: $string0');
+      expect(uuid0.toString(), equals(string0));
     });
 
     test('Make sure that really fast uuid.v4 doesn\'t produce duplicates', () {

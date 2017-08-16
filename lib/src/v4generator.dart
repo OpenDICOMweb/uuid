@@ -15,7 +15,7 @@ import 'dart:typed_data';
 //   this one: Template(RunTime): 142,266.66666666666 us.
 //   pub uuid: Template(RunTime): 170,166.66666666666 us.
 class V4Generator {
-  final Random _rng;
+  final Random rng;
   final bool isSecure;
   final int seed;
 
@@ -25,18 +25,35 @@ class V4Generator {
   /// [seed] affects only the [Random] RNG and can be used to gen
   /// pseudo-random numbers.
   V4Generator({this.isSecure: false, this.seed})
-      : _rng = (isSecure) ? new Random.secure() : new Random(seed);
+      : rng = (isSecure) ? _rngSecure : new Random(seed);
 
-  Uint8List get next {
-    Uint8List bytes = new Uint8List(16);
-    Uint32List int32 = bytes.buffer.asUint32List();
-    for (int i = 0; i < 4; i++) int32[i] = _rng.nextInt(0xFFFFFFFF);
-    _setToVersion4(bytes);
-    return bytes;
-  }
+  V4Generator.secure()
+      : isSecure = true,
+        seed = null,
+        rng = _rngSecure;
 
-  void _setToVersion4(Uint8List bytes) {
-    bytes[6] = bytes[6] >> 4 | 0x40;
-    bytes[8] = bytes[8] >> 2 | 0x80;
-  }
+  Uint8List get next => _getNext(rng);
+
+  static Uint8List get nextBasicUuidData => _getNext(_rngBasic);
+  static Uint8List get nextSecureUuidData => _getNext(_rngBasic);
+  static Uint8List get nextTestUuidData => _getNext(_rngTest);
+}
+
+
+final Random _rngSecure = new Random.secure();
+final Random _rngBasic = new Random();
+final Random _rngTest = new Random(0);
+
+Uint8List _getNext(Random rng) {
+  Uint8List bytes = new Uint8List(16);
+  Uint32List int32 = bytes.buffer.asUint32List();
+  for (int i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
+  _setToVersion4(bytes);
+  return bytes;
+}
+
+/// Sets the version and variant bits to the correct values.
+void _setToVersion4(Uint8List bytes) {
+  bytes[6] = bytes[6] >> 4 | 0x40;
+  bytes[8] = bytes[8] >> 2 | 0x80;
 }
