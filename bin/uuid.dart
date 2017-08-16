@@ -34,13 +34,13 @@ void checkUuid(Uuid uuid) {
   Uuid uuid1 = Uuid.parse(s);
   String t = uuid1.toString();
   if (s != t) log.debug('$s != $t');
-  if (!uuid1.isValid) log.debug("**** Uuid1: $uuid");
+  if (!uuid1.isValid) log.debug("**** Uuid0: $uuid");
   if (uuid != uuid1) throw "Uuid $uuid != $uuid1";
   if (s.length != 36) log.debug("invalid length ${s.length} in $s");
   if (s[14] != "4") log.debug("No 4 at Byte 6 (${s[14]} in Uuid: $uuid");
   if (!"89AaBb".contains(s[19]))
     log.debug("No 8|9|A|B at Byte 8 (${s[19]} in Uuid: $uuid");
   if (!uuid.isValid) {
-    log.debug("**** Uuid: $uuid");
+    log.debug("**** Uuid1: $uuid");
   }
 }
