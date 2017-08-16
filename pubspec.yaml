@@ -1,16 +1,15 @@
 name: uuid
-description: DICOM UIDs
+description: IETF UUIDs (primarily Version 4)
 version: 0.6.1
 
 author: Jim Philbin <mailto:jfphilbin@gmail.com>
 
-homepage: https://github.com/OpenDICOMweb/uid
+homepage: https://github.com/OpenDICOMweb/uuid
 
 environment:
   sdk: '>=1.24.2 <2.0.0'
 
 #dependencies:
-
 
 dev_dependencies:
   benchmark_harness: ^1.0.4
