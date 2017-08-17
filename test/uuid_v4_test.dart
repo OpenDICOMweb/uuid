@@ -7,24 +7,22 @@
 import 'package:system/system.dart';
 import "package:test/test.dart";
 
-import 'package:uuid/uuid_test.dart';
+import 'package:uuid/uuid_w_seed.dart';
+
+import 'data.dart';
 
 void main() {
-
   System.log.level = Level.debug2;
 
   group('Version 4 Tests', () {
-    test('Check if V4 is consistent using a static seed', () {
+    test('Check if V4 is consistent using a seed', () {
       var uuid0 = new Uuid();
-      var data0 = uuid0.data;
-      //  log.debug('u0: $u0');
-      var data1 = [
-        164, 98, 80, 42, 115, 175, 67, 65,
-        191, 196, 5, 149, 123, 112, 48, 221 // No reformat
-      ];
-      expect(data0.length, equals(16));
-      expect(data1.length, equals(16));
-      expect(data0, equals(data1));
+      log.debug('uuid0: $uuid0');
+      log.debug('data0: $data0');
+
+      expect(uuid0.data.length, equals(16));
+      expect(uuid0, equals(uuidD0));
+      expect(uuid0, equals(uuidS0));
     });
 
     test('Test Uuid.fromBytes', () {
@@ -52,15 +50,19 @@ void main() {
   });
 
   group('[Parse/Unparse Tests]', () {
-
-    System.log.level = Level.debug2;
+    System.log.level = Level.debug;
 
     test('Parsing a UUID', () {
-      var id = '00112233-4455-6677-8899-aabbccddeeff';
-      var uuid = Uuid.parse(id, onError: (id) => null);
-      log.debug('id:   $id');
-      log.debug('uuid: $uuid');
-      expect(uuid.toString(), equals('00112233-4455-6677-8899-aabbccddeeff'));
+      // Note: s0 and s1 are different at position 14.
+      String s0 = '00112233-4455-6677-8899-aabbccddeeff';
+      String s1 = '00112233-4455-4677-8899-aabbccddeeff';
+      //           --------------^---------------------
+
+      var uuid = Uuid.parse(s0, onError: (id) => null);
+      log.debug('  s0: $s0');
+      log.debug('uuid: ${uuid.asString}');
+      log.debug('  s1: $s1');
+      expect(uuid.toString(), equals(s1));
     });
   });
 }

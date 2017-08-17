@@ -12,15 +12,16 @@ import 'src/v4generator.dart';
 export 'src/errors.dart';
 export 'src/v4Generator.dart';
 
-// **** Basic Version ****
+// **** TESTING Version ****
 
 /// Universally Unique Identifiers (also GUID).
 ///
-/// _Note_: This class uses the basic random Uuid generator,
-/// which is not secure (although faster), but it DOES NOT use a seed.
+/// _Note_: This class should be used for testing the [Uuid] package.
+/// The seed can be edited, but should be used as it creates
+/// reproducible streams of [Uuid] data.
 class Uuid extends UuidBase {
-  // The random Uuid generator. This uses basic (non-secure) Random generator.
-  static final V4Generator v4Generator = V4Generator.basic;
+  /// The random [Uuid] generator.
+  static final V4Generator v4Generator = V4Generator.test;
 
   // The 16 bytes of UUID data.
   final Uint8List data;
@@ -31,12 +32,12 @@ class Uuid extends UuidBase {
   Uuid() : this.data = v4Generator.next;
 
   /// Constructs [Uuid] from a [List<int>] of 16 unsigned 8-bit [int]s.
-  Uuid.fromList(List<int> iList) : this.data = _listToBytes(iList);
+  Uuid.fromList(List<int> iList) : this.data = listToBytes(iList);
 
   String get type => 'Testing Uuid';
 
   /// Returns [true] if a secure [Random] number generator is being used.
-  static int get isSecure => v4Generator.isSecure;
+  static bool get isSecure => v4Generator.isSecure;
 
   /// Returns the integer [seed] provided to the pseudo (non-secure)
   /// random number generator.
@@ -50,6 +51,21 @@ class Uuid extends UuidBase {
   static bool isValidString(String s, [int type]) =>
       UuidBase.isValidString(s, type);
 
-  static Uuid parse(String s, {Null Function(String) onError}) =>
-      UuidBase.parse(s, onError: onError);
+  /// Parses [s], which must be in UUID format, and returns
+  /// a [Uint8List] 16 bytes long containing the value
+  /// of the [Uuid]. Returns [null] if [s] is not valid.
+  static Uint8List parseToBytes(String s,
+      {Uint8List bytes, UuidBase Function(String) onError}) =>
+      parseUuidToBytes(s, bytes: bytes, onError: onError);
+
+  /// Returns a Uuid created from [s], if [s] is in valid Uuid format;
+  /// otherwise, if [onError] is not [null] calls [onError]([s])
+  /// and returns its value. If [onError] is [null], then a
+  /// [InvalidUuidError] is thrown.
+  static Uuid parse(String s,
+      {Uint8List data, UuidBase Function(String) onError}) {
+    Uint8List bytes = parseUuidToBytes(s, data: data, onError: onError);
+    return (bytes == null) ? null : new Uuid.fromList(bytes);
+  }
+
 }

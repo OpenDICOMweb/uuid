@@ -7,15 +7,14 @@
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
-import 'package:uuid/uuid_test.dart';
+import 'package:uuid/uuid_w_seed.dart';
 //Urgent: create this same file with secure and basic
+
+import 'data.dart';
 
 const String uuidV1 = '23d57c30-afe7-11e4-ab7d-12e3f512a338';
 const String uuidV4 = '09bb1d8c-4965-4788-94f7-31b151eaba4e';
 
-//These are the first two UUIDs generated if the seed = 0.
-const String v4Random0 = '8f534d57-0195-4a3c-8796-8be3b34440bc';
-const String v4Random1 = '7eeab2ad-c74e-43fe-9720-db0e09797518';
 
 const List<int> uuidList = const <int>[
   149, 236, 195, 128, 175, 233, 17, 228, // No reformat
@@ -26,15 +25,17 @@ final uuidBytes = new Uint8List.fromList(uuidList);
 
 void main() {
   group('Uuid Tests', () {
-    test('Uuid Test with seed=0', () {
+
+    // The data in this test is in data.dart
+    test('Uuid Test with seed', () {
       print('seed: ${Uuid.seed}');
       Uuid uuid0 = new Uuid();
       print('Uuid: $uuid0');
-      expect(uuid0.asString, equals(v4Random0));
+      expect(uuid0.asString, equals(s0));
 
       Uuid uuid1 = new Uuid();
       print('Uuid: $uuid1');
-      expect(uuid1.asString, equals(v4Random1));
+      expect(uuid1.asString, equals(s1));
     });
 
     test('Uuid Strings', () {

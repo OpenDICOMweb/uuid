@@ -33,7 +33,7 @@ enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
 /// Use [UuidV4Generator] for more control over the RNG used.
 ///
 /// See https://api.dartlang.org/stable/dart-math/Random-class.html.
-class UuidBase {
+abstract class UuidBase {
   // static const int version = 4;
   static const int lengthInBytes = 16;
   static const int lengthAsString = 36;
@@ -60,6 +60,8 @@ class UuidBase {
     return false;
   }
 
+  // **** Interface
+
   /// Returns the [Uint8List] containing the 16-byte [Uuid] data.
   Uint8List get data;
 
@@ -67,7 +69,9 @@ class UuidBase {
   String get type;
 
   /// Return the [Uint8List] containing the 16-byte [Uuid] data.
- // Uint8List get bytes => data;
+  // Uint8List get bytes => data;
+
+  // **** End Interface
 
   // Returns an [UnmodifiableListView] of [bytes].
   UnmodifiableListView<int> get value => new UnmodifiableListView(data);
@@ -129,7 +133,7 @@ class UuidBase {
   static bool isNotValidData(List<int> data, [int version]) =>
       !isValidData(data, version);
 
-  //TODO: redoc
+/*  //TODO: redoc
   /// Parses [s], which must be in UUID format (see TODO:uuidRef),
   /// and returns a [Uint8List] 16 bytes long containing the value
   /// of the [Uuid]. If [s] is not valid [null] is returned.
@@ -140,16 +144,19 @@ class UuidBase {
   /// format; otherwise, if [onError] is not [null] calls [onError]([s])
   /// and returns its value. If [onError] is [null], then a
   /// [InvalidUuidError] is thrown.
-  static UuidBase parse(String s, {UuidBase Function(String) onError}) {
+  static Uuid parse(String s, {UuidBase Function(String) onError}) {
     var bytes = parseToBytes(s);
     if (bytes == null) {
-      if (onError != null) return onError(s);
-    } else {
-      throw new InvalidUuidError(s);
+      if (onError != null) {
+        return onError(s);
+      } else {
+        throw new InvalidUuidError(s);
+      }
     }
-    return bytes;
-  }
+    return new Uuid.fromList(bytes);
+  }*/
 }
+
 // **** Internal Procedures ****
 
 
@@ -266,31 +273,13 @@ bool _isValidStringVersion(String s, int version) {
   return false;
 }
 
-//TODO: Should this return [null] or [throw] an error?
-/// Parses a [String] in UUID format.  Returns the corresponding
-/// UUID if valid; otherwise, returns [null].
-Uuid _parse(String s, {Null Function(Uuid) onError}) {
-  if (!isValidString(s))
-  var uuid = new Uuid._(_parseToBytes(s, buffer, offset));
-  if (!uuid.isValid) return invalidUuidError(uuid);
-  return uuid;
-}
-
-
 /// Parses the [String] [s] into a list of byte values.
 /// Can optionally be provided a [Uint8List] to write into and
 /// a positional [offset] for where to start inputting into the buffer.
-Uint8List _parseToBytes(String s, [Uint8List list, int offset = 0]) {
-  Uint8List bytes =
-      (list != null) ? list.buffer.asUint8List(offset, 16) : new Uint8List(16);
-
-/* Flush when working
-  // Convert String Slice to 8-bit integer
-  void toBytes(int byteIndex, int start, int end) {
-    for (int i = start; i < end; i += 2)
-      bytes[byteIndex++] = _hexToByte[s.substring(i, i + 2)];
-  }
-*/
+Uint8List parseUuidToBytes(String s,
+    {Uint8List data, Null Function(Uuid) onError}) {
+  if (s == null || s.length != 36) return _uuidErrorHandler(s, 36, onError);
+  var bytes = _getData(data, onError);
   try {
     _toBytes(s, bytes, 0, 0, 8);
     _toBytes(s, bytes, 4, 9, 13);
@@ -298,7 +287,7 @@ Uint8List _parseToBytes(String s, [Uint8List list, int offset = 0]) {
     _toBytes(s, bytes, 8, 19, 23);
     _toBytes(s, bytes, 10, 24, 36);
   } catch (e) {
-    return null;
+    return _uuidErrorHandler(s, 36, onError);
   }
   return bytes;
 }
@@ -306,18 +295,31 @@ Uint8List _parseToBytes(String s, [Uint8List list, int offset = 0]) {
 /// Parses the [String] [s] into a list of byte values.
 /// Can optionally be provided a [Uint8List] to write into and
 /// a positional [offset] for where to start inputting into the buffer.
-Uint8List _parseDicomToBytes(String s, [Uint8List list, int offset = 0]) {
-  Uint8List bytes =
-  (list != null) ? list.buffer.asUint8List(offset, 16) : new Uint8List(16);
-
-  //Urgent What to do here? Should all parser have an OnError argument.
-  if (s == null, || s.length != 32 || !isHexString(s)) return null;
-  //TODO: add to string package
-  return string.toHex(s);
+Uint8List parseDicomUuidToBytes(String s, {Uint8List data, Uint8List onError}) {
+  if (s == null, || s.length != 32) return _uuidErrorHandler(s, 32, onError);
+  var bytes = _getData(data, onError);
+  return _toBytes(s, bytes, 0, 0, 32);
 }
 
+/// Returns a valid [Uuid] data buffer. If [data] is [null] a new
+/// data buffer is created. If [data] is not [null] and has [length]
+/// 16, it is returned; otherwise, [_uuidErrorHandler] is called
+/// with [onError] as its argument.
+Uint8List _getData(Uint8List data, Null Function(Uuid) onError) {
+  if (data == null) return new Uint8List(16);
+  return (data.length != 16) ? _uuidErrorHandler(onError) : data;
+}
 
-// Convert String Slice to 8-bit integer
+/// All parsing errors call this handler.  This should be the only
+/// function in this file that [throw]s.
+_uuidErrorHandler(String s, int targetLength, String Function(String) handler) {
+  String msg = 'Invalid character in String';
+  if (s == null) msg = 'Invalid: String is null';
+  if (s.length != length) 'Invalid String length(${s.length} should be $length';
+  return (handler != null) ? onError(s) : throw new InvalidUuidError(s, msg);
+}
+
+/// Converts characters from a String into the corresponding byte values.
 void _toBytes(String s, Uint8List bytes, int byteIndex, int start, int end) {
   for (int i = start; i < end; i += 2) {
     if (!isHexChar(s.codeUnitAt(i))) throw 'Bad UUID String: $s';

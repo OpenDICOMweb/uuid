@@ -12,17 +12,15 @@ import 'src/v4generator.dart';
 export 'src/errors.dart';
 export 'src/v4Generator.dart';
 
-
-// **** TESTING Version ****
+// **** Basic Version ****
 
 /// Universally Unique Identifiers (also GUID).
 ///
-/// _Note_: This class should be used for testing the [Uuid] package.
-/// The seed can be edited, but should be used as it creates
-/// reproducible streams of [Uuid] data.
+/// _Note_: This class uses the basic random Uuid generator,
+/// which is not secure (although faster), but it DOES NOT use a seed.
 class Uuid extends UuidBase {
-  /// The random [Uuid] generator.
-  static final V4Generator v4Generator = V4Generator.test;
+  // The random Uuid generator. This uses basic (non-secure) Random generator.
+  static final V4Generator v4Generator = V4Generator.basic;
 
   // The 16 bytes of UUID data.
   final Uint8List data;
@@ -38,7 +36,7 @@ class Uuid extends UuidBase {
   String get type => 'Testing Uuid';
 
   /// Returns [true] if a secure [Random] number generator is being used.
-  static int get isSecure => v4Generator.isSecure;
+  static bool get isSecure => v4Generator.isSecure;
 
   /// Returns the integer [seed] provided to the pseudo (non-secure)
   /// random number generator.
@@ -52,6 +50,17 @@ class Uuid extends UuidBase {
   static bool isValidString(String s, [int type]) =>
       UuidBase.isValidString(s, type);
 
-  static Uuid parse(String s, {Null Function(String) onError}) =>
-      UuidBase.parse(s, onError: onError);
+
+  /// Parses [s], which must be in UUID format, and returns
+  /// a [Uint8List] 16 bytes long containing the value
+  /// of the [Uuid]. Returns [null] if [s] is not valid.
+  static Uint8List parseToBytes(String s, [Uint8List buffer, int offset = 0]) =>
+      _parseToBytes(s, buffer, offset);
+
+  /// Returns a Uuid created from [s], if [s] is a valid Uuid in [String]
+  /// format; otherwise, if [onError] is not [null] calls [onError]([s])
+  /// and returns its value. If [onError] is [null], then a
+  /// [InvalidUuidError] is thrown.
+  static Uuid parse(String s, {UuidBase Function(String) onError}) =>
+    new Uuid.fromList(parseUuidToBytes(s, onError: onError);
 }

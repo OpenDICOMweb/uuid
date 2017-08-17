@@ -25,7 +25,7 @@ class V4Generator {
   /// [seed] affects only the [Random] RNG and can be used to gen
   /// pseudo-random numbers.
   V4Generator({this.isSecure: false, this.seed})
-      : rng = (isSecure) ? _rngSecure : new Random(seed);
+      : rng = (isSecure) ? new Random.secure() : new Random(seed);
 
   V4Generator._(this.rng, {this.isSecure: false, this.seed});
 
@@ -44,14 +44,16 @@ class V4Generator {
   static final Random _rngTest = new Random(0);
 
   /// Generates a series of random (secure) [Uuid]s.
-  static final secure = new V4Generator._(_rngSecure);
+  static final secure = new V4Generator._(_rngSecure, isSecure: true);
 
   /// Generates a series of pseudo-random [Uuid]s.
-  /// _Note_: This is faster than secure and can be used for testing.
+  /// _Note_: No [seed] is used. This is faster than
+  /// [secure] and can be used for testing.
   static final basic = new V4Generator._(_rngBasic);
 
   /// Generates a reproducible series of pseudo-random [Uuid]s.
-  static final test = new V4Generator._(_rngTest);
+  /// The [seed] used is 1.
+  static final test = new V4Generator._(_rngTest, seed: 0);
 }
 
 

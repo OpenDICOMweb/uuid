@@ -5,7 +5,7 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:benchmark_harness/benchmark_harness.dart';
-import 'package:uuid/uuid_basic.dart';
+import 'package:uuid/uuid_pseudo.dart';
 
 List<Uuid> uuids;
 List<String> strings;
