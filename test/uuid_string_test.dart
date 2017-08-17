@@ -58,7 +58,7 @@ void main() {
 
       //accepts valid List
       var uuid = new Uuid.fromList(uuidList);
-      print('uuidList uid: $uuid');
+      print('uuidList uuid: $uuid');
       expect(Uuid.isValidString(uuid.asString), true);
 
       //accepts valid Uint8List

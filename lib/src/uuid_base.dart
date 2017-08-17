@@ -134,7 +134,7 @@ class UuidBase {
   /// and returns a [Uint8List] 16 bytes long containing the value
   /// of the [Uuid]. If [s] is not valid [null] is returned.
   static Uint8List parseToBytes(String s, [Uint8List buffer, int offset = 0]) =>
-      _parseToBytes;
+      _parseToBytes(s, buffer, offset);
 
   /// Returns a Uuid created from [s], if [s] is a valid Uuid in [String]
   /// format; otherwise, if [onError] is not [null] calls [onError]([s])
@@ -186,7 +186,8 @@ void _setVariantToNCS(List<int> bytes) => bytes[8] | 0x80;
 void _setVariantToMicrosoft(List<int> bytes) => (bytes[8] & 0x1f) | 0xC0;
 void _setVariantToReserved(List<int> bytes) => (bytes[8] & 0x1f) | 0xE0;
 
-    Uint8List _listToBytes(List<int> list, {bool coerce = true}) {
+//TODO fix error handling
+Uint8List listToBytes(List<int> list, {bool coerce = true}) {
   if (list.length != 16)
     throw new ArgumentError('Invalid List Length: ${list.length}');
 

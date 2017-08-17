@@ -9,12 +9,20 @@ import 'dart:typed_data';
 import 'src/uuid_base.dart';
 import 'src/v4generator.dart';
 
-/// A class for testing the [Uuid] package. The seed can be edited
-/// but should be used as it creates reproducible results.
+export 'src/errors.dart';
+export 'src/v4Generator.dart';
+
+
+// **** TESTING Version ****
+
+/// Universally Unique Identifiers (also GUID).
+///
+/// _Note_: This class should be used for testing the [Uuid] package.
+/// The seed can be edited, but should be used as it creates
+/// reproducible streams of [Uuid] data.
 class Uuid extends UuidBase {
   /// The random [Uuid] generator.
-  static final V4Generator v4Generator =
-      new V4Generator(isSecure: false, seed: 0);
+  static final V4Generator v4Generator = V4Generator.test;
 
   // The 16 bytes of UUID data.
   final Uint8List data;
@@ -25,7 +33,7 @@ class Uuid extends UuidBase {
   Uuid() : this.data = v4Generator.next;
 
   /// Constructs [Uuid] from a [List<int>] of 16 unsigned 8-bit [int]s.
-  Uuid.fromList(List<int> iList) : this.data = _listToBytes(iList);
+  Uuid.fromList(List<int> iList) : this.data = listToBytes(iList);
 
   String get type => 'Testing Uuid';
 
@@ -47,4 +55,3 @@ class Uuid extends UuidBase {
   static Uuid parse(String s, {Null Function(String) onError}) =>
       UuidBase.parse(s, onError: onError);
 }
-

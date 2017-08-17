@@ -4,35 +4,52 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu> -
 // See the AUTHORS file for other contributors.
 
+import 'dart:typed_data';
+
 import 'src/uuid_base.dart';
 import 'src/v4generator.dart';
 
 export 'src/errors.dart';
+export 'src/v4Generator.dart';
 
-/// The primary class for generating secure [Uuid]s package.
-/// This class uses the secure random Uuid generator.
+// **** Basic Version ****
 
+/// Universally Unique Identifiers (also GUID).
+///
+/// _Note_: This class uses the basic random Uuid generator,
+/// which is not secure (although faster), but it DOES NOT use a seed.
 class Uuid extends UuidBase {
   // The random Uuid generator. This uses basic (non-secure) Random generator.
-  static final V4Generator generator =
-  new V4Generator(isSecure: false, seed: 0);
+  static final V4Generator v4Generator = V4Generator.basic;
 
-  /// Create a non-secure [Random] [Uuid].
-  Uuid() : super();
+  // The 16 bytes of UUID data.
+  final Uint8List data;
 
-  /// Create a [Uuid] from a [List<int>] of 16 unsigned 8-bit integers.
-  Uuid.fromList(List<int> bytes) : super.fromList(bytes);
+  /// Constructs a Version 4 [Uuid]. If [isSecure] is [false],
+  /// it uses the [Random] RNG.  If [isSecure] is [true], it uses
+  /// the [Random.secure] RNG. The default is isSecure is [true].
+  Uuid() : this.data = v4Generator.next;
 
-  String get type => 'Basic (not secure)';
+  /// Constructs [Uuid] from a [List<int>] of 16 unsigned 8-bit [int]s.
+  Uuid.fromList(List<int> iList) : this.data = _listToBytes(iList);
 
+  String get type => 'Testing Uuid';
+
+  /// Returns [true] if a secure [Random] number generator is being used.
   static int get isSecure => v4Generator.isSecure;
-  static int get seed => v4generator.seed;
+
+  /// Returns the integer [seed] provided to the pseudo (non-secure)
+  /// random number generator.
+  static int get seed => v4Generator.seed;
+
+  /// If [true] [Uuid] [String]s will be in uppercase hexadecimal.
+  /// If [false] [Uuid] [String]s will be in lowercase hexadecimal.
   static bool get useUppercase => UuidBase.useUppercase;
 
+  /// Returns [true] if [s] is a valid [Uuid].
   static bool isValidString(String s, [int type]) =>
       UuidBase.isValidString(s, type);
 
-  /// Create a [Uuid] from a [String] in Uuid format.
   static Uuid parse(String s, {Null Function(String) onError}) =>
       UuidBase.parse(s, onError: onError);
 }

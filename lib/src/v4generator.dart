@@ -27,23 +27,36 @@ class V4Generator {
   V4Generator({this.isSecure: false, this.seed})
       : rng = (isSecure) ? _rngSecure : new Random(seed);
 
-  V4Generator.secure()
-      : isSecure = true,
-        seed = null,
-        rng = _rngSecure;
+  V4Generator._(this.rng, {this.isSecure: false, this.seed});
 
-  Uint8List get next => _getNext(rng);
+  Uint8List get next {
+    Uint8List bytes = new Uint8List(16);
+    Uint32List int32 = bytes.buffer.asUint32List();
+    for (int i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
+    // Set the version and variant bits to the correct values.
+      bytes[6] = bytes[6] >> 4 | 0x40;
+      bytes[8] = bytes[8] >> 2 | 0x80;
+    return bytes;
+  }
 
-  static Uint8List get nextBasicUuidData => _getNext(_rngBasic);
-  static Uint8List get nextSecureUuidData => _getNext(_rngBasic);
-  static Uint8List get nextTestUuidData => _getNext(_rngTest);
+  static final Random _rngSecure = new Random.secure();
+  static final Random _rngBasic = new Random();
+  static final Random _rngTest = new Random(0);
+
+  /// Generates a series of random (secure) [Uuid]s.
+  static final secure = new V4Generator._(_rngSecure);
+
+  /// Generates a series of pseudo-random [Uuid]s.
+  /// _Note_: This is faster than secure and can be used for testing.
+  static final basic = new V4Generator._(_rngBasic);
+
+  /// Generates a reproducible series of pseudo-random [Uuid]s.
+  static final test = new V4Generator._(_rngTest);
 }
 
 
-final Random _rngSecure = new Random.secure();
-final Random _rngBasic = new Random();
-final Random _rngTest = new Random(0);
 
+/* Flush prior to V0.9.0
 Uint8List _getNext(Random rng) {
   Uint8List bytes = new Uint8List(16);
   Uint32List int32 = bytes.buffer.asUint32List();
@@ -56,4 +69,4 @@ Uint8List _getNext(Random rng) {
 void _setToVersion4(Uint8List bytes) {
   bytes[6] = bytes[6] >> 4 | 0x40;
   bytes[8] = bytes[8] >> 2 | 0x80;
-}
+}*/

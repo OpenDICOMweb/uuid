@@ -5,11 +5,9 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:benchmark_harness/benchmark_harness.dart';
-import 'package:uuid/uuid_basic.dart' as basic;
-import 'package:uuid/uuid_secure.dart' as secure;
+import 'package:uuid/uuid_basic.dart';
 
-
-List<basic.Uuid> uuids;
+List<Uuid> uuids;
 List<String> strings;
 
 const int length = 1000;
@@ -19,7 +17,7 @@ class TemplateBenchmark extends BenchmarkBase {
   const TemplateBenchmark() : super("Template");
 
   static void main() {
-   // basic.initialize(isSecure: false, seed: 1);
+    // initialize(isSecure: false, seed: 1);
     new TemplateBenchmark().report();
   }
 
@@ -28,17 +26,17 @@ class TemplateBenchmark extends BenchmarkBase {
   void run() {
     for (int i = 0; i < length; i++)
       //uuids[i].toString();
-      basic.Uuid.parse(strings[i]);
+      Uuid.parse(strings[i]);
   }
 
   // Not measured: setup code executed before the benchmark runs.
   @override
   void setup() {
-  // Uuid.initialize(isSecure: false, seed: 0);
-    uuids = new List<basic.Uuid>(length);
+    // Uuid.initialize(isSecure: false, seed: 0);
+    uuids = new List<Uuid>(length);
     strings = new List<String>(length);
     for (int i = 0; i < length; i++) {
-      uuids[i] = new basic.Uuid();
+      uuids[i] = new Uuid();
       strings[i] = uuids[i].toString();
     }
 //    print("Strings: $uuids");
