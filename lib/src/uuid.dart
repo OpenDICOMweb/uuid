@@ -126,14 +126,17 @@ class Uuid {
 
   //TODO: Unit Test
   /// Sets the value of the default generator
-  bool setGenerator(GeneratorType type) {
+  static bool setGenerator(GeneratorType type) {
     switch (type) {
       case GeneratorType.secure:
         generator = V4Generator.secure;
+        break;
       case GeneratorType.pseudo:
         generator = V4Generator.pseudo;
+        break;
       case GeneratorType.seededPseudo:
-        generator = V4Generator.seededpseudo;
+        generator = V4Generator.seededPseudo;
+        break;
       default:
         throw 'Invalid Uuid Generator Type: $type';
     }

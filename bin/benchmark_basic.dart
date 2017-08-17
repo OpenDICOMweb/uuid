@@ -17,8 +17,8 @@ class TemplateBenchmark extends BenchmarkBase {
   const TemplateBenchmark() : super("Template");
 
   static void main() {
-    // initialize(isSecure: false, seed: 1);
     new TemplateBenchmark().report();
+    Uuid.setGenerator(GeneratorType.secure);
   }
 
   // The benchmark code.
