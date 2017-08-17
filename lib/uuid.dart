@@ -5,6 +5,7 @@
 // See the AUTHORS file for other contributors.
 
 export 'src/errors.dart';
-export 'src/uuid_base.dart';
+export 'src/uuid.dart';
+export 'src/v4generator.dart';
 
 

@@ -5,12 +5,12 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:benchmark_harness/benchmark_harness.dart';
-import 'package:uuid/uuid_pseudo.dart';
+import 'package:uuid/uuid.dart';
 
 List<Uuid> uuids;
 List<String> strings;
 
-const int length = 1000;
+const int length = 10000;
 
 // Create a new benchmark by extending BenchmarkBase.
 class TemplateBenchmark extends BenchmarkBase {
@@ -39,7 +39,6 @@ class TemplateBenchmark extends BenchmarkBase {
       uuids[i] = new Uuid();
       strings[i] = uuids[i].toString();
     }
-//    print("Strings: $uuids");
   }
 
   // Not measured: teardown code executed after the benchmark runs.

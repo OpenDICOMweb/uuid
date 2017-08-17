@@ -5,7 +5,7 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:system/system.dart';
-import 'package:uuid/uuid_pseudo.dart';
+import 'package:uuid/uuid.dart';
 
 //Urgent: test invalidUuidError
 //Urgent: test wrong List length, both too few and too many.

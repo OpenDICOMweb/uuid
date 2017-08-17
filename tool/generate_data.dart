@@ -4,7 +4,7 @@
 // Original author: Jim Philbin <jfphilbin@gmail.edu> -
 // See the AUTHORS file for other contributors.
 
-import 'package:uuid/uuid_w_seed.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   var data = generateData();

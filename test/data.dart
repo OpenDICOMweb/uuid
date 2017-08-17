@@ -6,7 +6,7 @@
 
 /// The following data are generate with tools/generate_data.dart.import '
 
-import 'package:uuid/uuid_w_seed.dart';
+import 'package:uuid/uuid.dart';
 // 0: data
 List<int> data0 = <int>[
   143, 83, 77, 87, 1, 149, 74, 60, // No reformat

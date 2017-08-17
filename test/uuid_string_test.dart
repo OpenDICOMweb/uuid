@@ -7,8 +7,7 @@
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
-import 'package:uuid/uuid_w_seed.dart';
-//Urgent: create this same file with secure and basic
+import 'package:uuid/uuid.dart';
 
 import 'data.dart';
 
@@ -29,11 +28,11 @@ void main() {
     // The data in this test is in data.dart
     test('Uuid Test with seed', () {
       print('seed: ${Uuid.seed}');
-      Uuid uuid0 = new Uuid();
+      Uuid uuid0 = new Uuid.seededPseudo();
       print('Uuid: $uuid0');
       expect(uuid0.asString, equals(s0));
 
-      Uuid uuid1 = new Uuid();
+      Uuid uuid1 = new Uuid.seededPseudo();
       print('Uuid: $uuid1');
       expect(uuid1.asString, equals(s1));
     });

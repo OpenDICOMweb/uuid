@@ -6,17 +6,18 @@
 
 import 'package:system/system.dart';
 import "package:test/test.dart";
-
-import 'package:uuid/uuid_w_seed.dart';
+import 'package:uuid/uuid.dart';
 
 import 'data.dart';
+
+//TODO: generalize this package to use: uuid_pseudo, uuid_secure, uuid_w_seed
 
 void main() {
   System.log.level = Level.debug2;
 
   group('Version 4 Tests', () {
     test('Check if V4 is consistent using a seed', () {
-      var uuid0 = new Uuid();
+      var uuid0 = new Uuid.seededPseudo();
       log.debug('uuid0: $uuid0');
       log.debug('data0: $data0');
 

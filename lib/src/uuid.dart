@@ -13,8 +13,9 @@ import 'package:collection/collection.dart';
 import 'errors.dart';
 import 'v4generator.dart';
 
-enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
+enum UuidVariant {ncs, rfc4122, Microsoft, reserved }
 
+enum GeneratorType {secure, pseudo, seededPseudo}
 
 // Note: This implementation is faster than http:pub.dartlang.org/uuid
 //   this one: Template(RunTime): 2101.890756302521 us.
@@ -33,27 +34,35 @@ enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
 /// Use [UuidV4Generator] for more control over the RNG used.
 ///
 /// See https://api.dartlang.org/stable/dart-math/Random-class.html.
-abstract class UuidBase {
-  // static const int version = 4;
-  static const int lengthInBytes = 16;
-  static const int lengthAsString = 36;
-  static const int lengthAsUidString = 32;
-
-  /// A random Version 4 [Uuid] generator.
-  // Interface instantiated by super class.
-  static V4Generator v4generator;
+class Uuid {
+  /// A random V4 UUID generator.
+  static V4Generator generator = V4Generator.secure;
 
   /// If [true] uppercase letters will be used when converting
   /// [Uuid]s to [String]s; otherwise lowercase will be used.
   static bool useUppercase = false;
 
+  /// The 16 bytes of UUID data.
+  final Uint8List data;
+
+  /// Constructs a Version 4 [Uuid]. If [isSecure] is [false],
+  /// it uses the [Random] RNG.  If [isSecure] is [true], it uses
+  /// the [Random.secure] RNG. The default is isSecure is [true].
+  Uuid() : data = generator.next;
+
+  Uuid.pseudo() : data = V4Generator.pseudo.next;
+
+  Uuid.seededPseudo() : data = V4Generator.seededPseudo.next;
+
+  /// Constructs [Uuid] from a [List<int>] of 16 unsigned 8-bit [int]s.
+  Uuid.fromList(List<int> iList) : this.data = _listToBytes(iList);
+
   /// Two [Uuid]s are [==] if they contain equivalent [data].
   @override
   bool operator ==(Object other) {
-    if (other is UuidBase) {
-      //TODO: This test is not strictly necessary. Remove it after testing
+    if (other is Uuid) {
       if (data.length != other.data.length) return false;
-      for (int i = 0; i < lengthInBytes; i++)
+      for (int i = 0; i < kLengthInBytes; i++)
         if (data[i] != other.data[i]) return false;
       return true;
     }
@@ -62,14 +71,12 @@ abstract class UuidBase {
 
   // **** Interface
 
-  /// Returns the [Uint8List] containing the 16-byte [Uuid] data.
-  Uint8List get data;
+  /// A random Version 4 [Uuid] generator.
+  // Interface instantiated by super class.
+  static V4Generator v4Generator;
 
   /// Returns a [String] describing this [Uuid] [class].
   String get type;
-
-  /// Return the [Uint8List] containing the 16-byte [Uuid] data.
-  // Uint8List get bytes => data;
 
   // **** End Interface
 
@@ -117,6 +124,28 @@ abstract class UuidBase {
   @override
   String toString() => _toUuidFormat(data, 0, useUppercase);
 
+  //TODO: Unit Test
+  /// Sets the value of the default generator
+  bool setGenerator(GeneratorType type) {
+    switch (type) {
+      case GeneratorType.secure:
+        generator = V4Generator.secure;
+      case GeneratorType.pseudo:
+        generator = V4Generator.pseudo;
+      case GeneratorType.seededPseudo:
+        generator = V4Generator.seededpseudo;
+      default:
+        throw 'Invalid Uuid Generator Type: $type';
+    }
+    return true;
+  }
+  /// Returns [true] if a secure [Random] number generator is being used.
+  static bool get isSecure => generator.isSecure;
+
+  /// Returns the integer [seed] provided to the pseudo (non-secure)
+  /// random number generator.
+  static int get seed => generator.seed;
+
   /// Returns [true] if [s] is a valid [Uuid] for [version]. If
   /// [version] is [null] returns [true] for any valid version.
   static bool isValidString(String s, [int version]) =>
@@ -133,32 +162,30 @@ abstract class UuidBase {
   static bool isNotValidData(List<int> data, [int version]) =>
       !isValidData(data, version);
 
-/*  //TODO: redoc
-  /// Parses [s], which must be in UUID format (see TODO:uuidRef),
-  /// and returns a [Uint8List] 16 bytes long containing the value
-  /// of the [Uuid]. If [s] is not valid [null] is returned.
-  static Uint8List parseToBytes(String s, [Uint8List buffer, int offset = 0]) =>
-      _parseToBytes(s, buffer, offset);
+  /// Parses [s], which must be in UUID format, and returns
+  /// a [Uint8List] 16 bytes long containing the value
+  /// of the [Uuid]. Returns [null] if [s] is not valid.
+  static Uint8List parseToBytes(String s,
+      {Uint8List data, Uint8List Function(String) onError}) =>
+      parseUuidToBytes(s, data: data, onError: onError);
 
-  /// Returns a Uuid created from [s], if [s] is a valid Uuid in [String]
-  /// format; otherwise, if [onError] is not [null] calls [onError]([s])
+  /// Returns a Uuid created from [s], if [s] is in valid Uuid format;
+  /// otherwise, if [onError] is not [null] calls [onError]([s])
   /// and returns its value. If [onError] is [null], then a
   /// [InvalidUuidError] is thrown.
-  static Uuid parse(String s, {UuidBase Function(String) onError}) {
-    var bytes = parseToBytes(s);
-    if (bytes == null) {
-      if (onError != null) {
-        return onError(s);
-      } else {
-        throw new InvalidUuidError(s);
-      }
-    }
-    return new Uuid.fromList(bytes);
-  }*/
+  static Uuid parse(String s,
+      {Uint8List data, Uuid Function(String) onError}) {
+    Uint8List bytes = Uuid.parseToBytes(s, data: data, onError: onError);
+    return (bytes == null) ? null : new Uuid.fromList(bytes);
+  }
 }
 
 // **** Internal Procedures ****
 
+const int kVersion = 4;
+const int kLengthInBytes = 16;
+const int kLengthAsString = 36;
+const int kLengthInUidString = 32;
 
 Uint8List _getBytes(Random rng) {
   Uint8List bytes = new Uint8List(16);
@@ -179,7 +206,8 @@ bool _isValidList(List<int> list, [int version]) {
   if (!ok) return false;
   if (v == 1 || v == 2) return true;
   if (v == 4) return list[8] >> 6 != 2;
-  //Urgent: this is
+  //Enhancement
+  throw new UnsupportedError('Version 3 & 5 UUIDs are not yet supported');
 }
 
 bool _isValidV4List(Uint8List bytes) =>
@@ -187,19 +215,16 @@ bool _isValidV4List(Uint8List bytes) =>
 
 void _setVersion(List<int> bytes) => (bytes[6] & 0x0f) | 0x40;
 
-//Urgent: should it be ox3f (0b00111111) or 0xbf (0b10111111). I think bf
 void _setVariantToIETF(List<int> bytes) => (bytes[8] & 0xbf) | 0x80;
 void _setVariantToNCS(List<int> bytes) => bytes[8] | 0x80;
 void _setVariantToMicrosoft(List<int> bytes) => (bytes[8] & 0x1f) | 0xC0;
 void _setVariantToReserved(List<int> bytes) => (bytes[8] & 0x1f) | 0xE0;
 
-//TODO fix error handling
-Uint8List listToBytes(List<int> list, {bool coerce = true}) {
-  if (list.length != 16)
-    throw new ArgumentError('Invalid List Length: ${list.length}');
-
-  Uint8List bytes =
-      (list is Uint8List) ? list : new Uint8List.fromList(list.sublist(0, 16));
+//TODO: Unit Test Error handling
+Uint8List _listToBytes(List<int> data,
+    {Uint8List Function(List<int>) onError, bool coerce = true}) {
+  if (data.length != 16) return _uuidErrorHandler(list);
+  Uint8List bytes = _getData(data, onError);
   // Next to lines convert it to valid Version 4.
   if (coerce) {
     if ((bytes[6] >> 4) != 0x4) bytes[6] = (bytes[6] & 0x0f) | 0x40;
@@ -218,7 +243,7 @@ const pattern =
 // where V is version, and N is node.
 const List<int> kDashes = const <int>[8, 13, 18, 23];
 const List<int> kStarts = const <int>[0, 9, 14, 19, 24];
-const List<int> kEnds = const <int>[8, 13, 18, 23, 36];
+const List<int> kEnds = const <int>[8, 13, 18, 23, kLengthAsString];
 
 const int kDash = 0x2D;
 
@@ -226,7 +251,7 @@ const int kDash = 0x2D;
 /// it just validates the format; otherwise, [type] must have a value
 /// between 1 and 5.
 bool _isValidUuidString(String uuidString, [int type]) {
-  if (uuidString.length != 36) return false;
+  if (uuidString.length != kLengthAsString) return false;
   for (int pos in kDashes)
     if (uuidString.codeUnitAt(pos) != kDash) return false;
   var s = uuidString.toLowerCase();
@@ -278,16 +303,18 @@ bool _isValidStringVersion(String s, int version) {
 /// a positional [offset] for where to start inputting into the buffer.
 Uint8List parseUuidToBytes(String s,
     {Uint8List data, Null Function(Uuid) onError}) {
-  if (s == null || s.length != 36) return _uuidErrorHandler(s, 36, onError);
+  if (s == null || s.length != kLengthAsString) return _uuidErrorHandler(s,
+      kLengthAsString,
+      onError);
   var bytes = _getData(data, onError);
   try {
     _toBytes(s, bytes, 0, 0, 8);
     _toBytes(s, bytes, 4, 9, 13);
     _toBytes(s, bytes, 6, 14, 18);
     _toBytes(s, bytes, 8, 19, 23);
-    _toBytes(s, bytes, 10, 24, 36);
+    _toBytes(s, bytes, 10, 24, kLengthAsString);
   } catch (e) {
-    return _uuidErrorHandler(s, 36, onError);
+    return _uuidErrorHandler(s, kLengthAsString, onError);
   }
   return bytes;
 }
@@ -305,9 +332,11 @@ Uint8List parseDicomUuidToBytes(String s, {Uint8List data, Uint8List onError}) {
 /// data buffer is created. If [data] is not [null] and has [length]
 /// 16, it is returned; otherwise, [_uuidErrorHandler] is called
 /// with [onError] as its argument.
-Uint8List _getData(Uint8List data, Null Function(Uuid) onError) {
+Uint8List _getData(List<int> data, Null Function(Uuid) onError) {
   if (data == null) return new Uint8List(16);
-  return (data.length != 16) ? _uuidErrorHandler(onError) : data;
+  if (data.length != 16) return _uuidErrorHandler(onError);
+  if (data is Uint8List) return data;
+  return new Uint8List.fromList(data);
 }
 
 /// All parsing errors call this handler.  This should be the only
@@ -330,7 +359,7 @@ void _toBytes(String s, Uint8List bytes, int byteIndex, int start, int end) {
 /// Unparses (converts [Uuid] to a [String]) a [bytes] of bytes and
 /// outputs a proper UUID string. An optional [offset] is allowed if
 /// you want to start at a different point in the buffer.
-//TODO: make the uppercase switch work.
+//TODO: Unit test uppercase/lowercase
 String _toUuidFormat(Uint8List bytes, int offset, bool useUppercase) {
   var i = offset;
   List<String> _byteToHex = (useUppercase) ? _byteToUppercaseHex :
@@ -364,7 +393,7 @@ String _toUidString(Uint8List bytes, [int offset = 0]) =>
 //Urgent: reformat in 8 x 32 rows use // to avoid reformatting
 /// Returns the Hex [String] equivalent to an 8-bit [int].
 const List<String> _byteToLowercaseHex = const [
-  // This comment prevents reformatting.
+  //Urgent: format like the next two lines
   "00", "01", "02", "03", "04", "05", "06", "07", "08", // No reformat
   "09", "0a", "0b", "0c", "0d", "0e", "0f", "10", "11",
   "12",
@@ -612,7 +641,7 @@ const List<String> _byteToLowercaseHex = const [
 //Urgent: 2. convert all lowercase letters to uppercase.
 /// Returns the Hex [String] equivalent to an 8-bit [int].
 const List<String> _byteToUppercaseHex = const [
-  // This comment prevents reformatting.
+  //Urgent: format like the next two lines
   "00", "01", "02", "03", "04", "05", "06", "07", "08", // No reformat
   "09", "0a", "0b", "0c", "0d", "0e", "0f", "10", "11",
   "12",
@@ -855,7 +884,7 @@ const List<String> _byteToUppercaseHex = const [
   "ff"
 ];
 
-//Urgent: add to string package
+//TODO Jim: add to string package
 // Urgent: reformat into 6 columns
 /// Returns the 8-bit [int] equivalent to the Hex [String].
 const Map<String, int> _hexToByte = const {
