@@ -8,6 +8,7 @@
 
 import 'package:system/system.dart';
 import 'package:test/test.dart';
+import 'package:uuid/uuid.dart';
 
 import 'data.dart';
 
@@ -15,11 +16,13 @@ import 'data.dart';
 void main() {
   const List<String> typeChars = const <String>["8", "9", "a", "b"];
 
+  System.log.level = Level.debug;
   String version;
   String type;
-
+  Uuid.useUppercase = false;
   test('Test Generated Data', () {
     expect(uuidD0 == uuidS0, true);
+    log.debug(uuidD0);
     version = s0[14];
     log.debug("version: $version");
     expect(s0[14] == "4", true);

@@ -34,7 +34,7 @@ void main() {
       const String string0 = "109156be-c4fb-41ea-b1b4-efe1671c5836";
 
       log.debug('data0: $data0');
-      Uuid uuid0 = new Uuid.fromList(data0);
+      Uuid uuid0 = new Uuid.fromList(data0, coerce: true);
 
       log.debug('  uuid0: $uuid0');
       log.debug('string0: $string0');
