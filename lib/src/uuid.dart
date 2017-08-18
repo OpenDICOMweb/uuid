@@ -142,6 +142,9 @@ class Uuid {
     }
     return true;
   }
+
+  static generateDcmString =>
+
   /// Returns [true] if a secure [Random] number generator is being used.
   static bool get isSecure => generator.isSecure;
 
