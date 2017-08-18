@@ -9,7 +9,8 @@ homepage: https://github.com/OpenDICOMweb/uuid
 environment:
   sdk: '>=1.24.2 <2.0.0'
 
-#dependencies:
+dependencies:
+
 
 dev_dependencies:
   benchmark_harness: ^1.0.4

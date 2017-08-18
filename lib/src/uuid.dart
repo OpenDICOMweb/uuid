@@ -122,7 +122,7 @@ class Uuid {
   /// the hexadecimal characters are in lowercase; however, if
   /// [useUppercase] is [true] the returned [String] is in uppercase.
   @override
-  String toString() => _toUuidFormat(data, 0, useUppercase);
+  String toString() => _toUuidFormat(data, useUppercase);
 
   //TODO: Unit Test
   /// Sets the value of the default generator
@@ -143,7 +143,11 @@ class Uuid {
     return true;
   }
 
-  static String get generateDcmString => _toUidString(generator.next, useUppercase);
+  static String get generatePseudoDcmString =>
+      _toUidString(V4Generator.pseudo.next, useUppercase);
+
+  static String get generateSecureDcmString =>
+      _toUidString(V4Generator.secure.next, useUppercase);
 
   /// Returns [true] if a secure [Random] number generator is being used.
   static bool get isSecure => generator.isSecure;
@@ -383,7 +387,7 @@ String _toUuidFormat(Uint8List bytes, bool useUppercase) {
 /// Unparses (converts [Uuid] to a [String]) a [bytes] of bytes and
 /// outputs a proper UUID string. An optional [offset] is allowed if
 /// you want to start at a different point in the buffer.
-String _toUuidString(Uint8List bytes, int offset, bool useUppercase) {
+String _toUuidString(Uint8List bytes) {
   StringBuffer sb = new StringBuffer();
   List<String> byteToHex =
       (useUppercase) ? _byteToUppercaseHex : _byteToLowercaseHex;
