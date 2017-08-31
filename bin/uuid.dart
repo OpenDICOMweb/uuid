@@ -10,7 +10,7 @@ import 'package:uuid/uuid.dart';
 //Urgent: test invalidUuidError
 //Urgent: test wrong List length, both too few and too many.
 void main() {
-  System.log.level = Level.debug2;
+  system.log.level = Level.debug2;
 
   for (int i = 0; i < 1000; i++) {
     Uuid uuid = new Uuid();

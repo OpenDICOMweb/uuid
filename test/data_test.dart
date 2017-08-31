@@ -16,7 +16,7 @@ import 'data.dart';
 void main() {
   const List<String> typeChars = const <String>["8", "9", "a", "b"];
 
-  System.log.level = Level.debug;
+  system.log.level = Level.debug;
   String version;
   String type;
   Uuid.useUppercase = false;
