@@ -7,6 +7,7 @@
 /// The following data are generate with tools/generate_data.dart.import '
 
 import 'package:system/system.dart';
+import 'package:system/server.dart';
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +17,7 @@ import 'data.dart';
 void main() {
   const List<String> typeChars = const <String>["8", "9", "a", "b"];
 
-  system.log.level = Level.debug;
+  Server.initialize(name: 'data_test', level: Level.info0);
   String version;
   String type;
   Uuid.useUppercase = false;

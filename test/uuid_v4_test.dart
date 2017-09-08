@@ -5,6 +5,7 @@
 // See the AUTHORS file for other contributors.
 
 import 'package:system/system.dart';
+import 'package:system/server.dart';
 import "package:test/test.dart";
 import 'package:uuid/uuid.dart';
 
@@ -13,7 +14,7 @@ import 'data.dart';
 //TODO: generalize this package to use: uuid_pseudo, uuid_secure, uuid_w_seed
 
 void main() {
-  system.log.level = Level.debug2;
+  Server.initialize(name: 'uuid_v4_test', level: Level.info0);
 
   group('Version 4 Tests', () {
     test('Check if V4 is consistent using a seed', () {
@@ -51,7 +52,6 @@ void main() {
   });
 
   group('[Parse/Unparse Tests]', () {
-    system.log.level = Level.debug;
 
     test('Parsing a UUID', () {
       // Note: s0 and s1 are different at position 14.
