@@ -4,19 +4,68 @@
 // Original author: Jim Philbin <jfphilbin@gmail.edu> - 
 // See the AUTHORS file for other contributors.
 
-abstract class UuidErrorHandler {
-  Null inValidUuidError(Object uuid);
+import 'dart:typed_data';
+
+import 'package:system/system.dart';
+
+class InvalidUuidListError extends Error {
+	List<int> bytes;
+	String msg;
+
+
+	InvalidUuidListError(this.bytes, this.msg);
+
+	String toString() => message(msg, bytes);
+
+	static String message(String msg, List<int> bytes) =>
+			'InvalidUuidListError: $msg: $bytes';
 }
 
-class InvalidUuidError extends Error {
-  Object uuid;
-
-  InvalidUuidError(this.uuid);
-
-  String toString() => message(uuid);
-
-  static String message(Object uuid) {
-    var s = (uuid is String) ? '"$uuid"' : '$uuid';
-    return 'InvalidUuidError: $s';
-  }
+Uint8List invalidUuidListError(List<int> iList, msg) {
+	log.error(msg);
+	if (throwOnError) throw new InvalidUuidListError(iList, msg);
+	return null;
 }
+
+class InvalidUuidParseError extends Error {
+	String msg;
+
+	InvalidUuidParseError(this.msg);
+
+	String toString() => message(msg);
+
+	static String message(String msg) => 'InvalidUuidParseError: $msg';
+}
+
+Uint8List invalidUuidParseError(String msg) {
+	log.error(msg);
+	if (throwOnError) throw new InvalidUuidParseError(msg);
+	return null;
+}
+
+Uint8List invalidUuidStringLengthError(String s, int targetLength) {
+	var msg = 'Invalid String length(${s.length} should be $targetLength';
+	return invalidUuidParseError(msg);
+}
+
+Uint8List invalidUuidNullStringError() {
+	var msg = 'Invalid null string';
+	return invalidUuidParseError(msg);
+}
+
+Uint8List invalidUuidCharacterError(String s, [String char]) {
+	var msg = 'Invalid character in String';
+	if (char != null) msg += ': "$char"';
+	return invalidUuidParseError(msg);
+}
+
+Uint8List invalidUuidParseToBytesError(String s, int targetLength) {
+	if (s == null) return invalidUuidNullStringError();
+	if (s.length != targetLength) return invalidUuidStringLengthError(s, targetLength);
+	return invalidUuidParseError(s);
+}
+
+
+
+
+

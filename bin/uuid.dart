@@ -4,13 +4,13 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'package:system/system.dart';
+import 'package:system/server.dart';
 import 'package:uuid/uuid.dart';
 
 //Urgent: test invalidUuidError
 //Urgent: test wrong List length, both too few and too many.
 void main() {
-  system.log.level = Level.debug2;
+  Server.initialize(name: 'uuid.dart', level: Level.debug2);
 
   for (int i = 0; i < 1000; i++) {
     Uuid uuid = new Uuid();

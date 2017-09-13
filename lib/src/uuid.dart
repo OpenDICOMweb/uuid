@@ -7,15 +7,21 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:string/ascii.dart';
+
 import 'package:collection/collection.dart';
+import 'package:string/string.dart';
+import 'package:system/core.dart';
 
 import 'errors.dart';
 import 'v4generator.dart';
 
-enum UuidVariant {ncs, rfc4122, Microsoft, reserved }
+typedef Uint8List OnUuidBytesError(List<int> iList);
+typedef Uuid OnUuidParseError(String);
+typedef Uint8List OnUuidParseToBytesError(String);
 
-enum GeneratorType {secure, pseudo, seededPseudo}
+enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
+
+enum GeneratorType { secure, pseudo, seededPseudo }
 
 // Note: This implementation is faster than http:pub.dartlang.org/uuid
 //   this one: Template(RunTime): 2101.890756302521 us.
@@ -55,41 +61,23 @@ class Uuid {
   Uuid.seededPseudo() : data = V4Generator.seededPseudo.next;
 
   /// Constructs [Uuid] from a [List<int>] of 16 unsigned 8-bit [int]s.
-  Uuid.fromList(List<int> iList,
-                {Uint8List Function(List<int>) onError, bool coerce = true})
-      : this.data = _listToBytes(iList, onError: onError, coerce: coerce);
+  Uuid.fromList(List<int> iList, {OnUuidBytesError onError, bool coerce = true})
+      : this.data = _listToBytes(iList);
 
   /// Two [Uuid]s are [==] if they contain equivalent [data].
   @override
   bool operator ==(Object other) {
     if (other is Uuid) {
       if (data.length != other.data.length) return false;
-      for (int i = 0; i < kLengthInBytes; i++)
+      for (int i = 0; i < kDataLengthInBytes; i++)
         if (data[i] != other.data[i]) return false;
       return true;
     }
     return false;
   }
 
-  // **** Interface
-
-  /// A random Version 4 [Uuid] generator.
-  // Interface instantiated by super class.
-  static V4Generator v4Generator;
-
-  /// Returns a [String] describing this [Uuid] [class].
-  String get type;
-
-  // **** End Interface
-
   // Returns an [UnmodifiableListView] of [bytes].
   UnmodifiableListView<int> get value => new UnmodifiableListView(data);
-
-  /// Returns the version number of [this].
-  int get version => data[6] >> 4;
-
-  /// Returns true if this is a random or pseudo-random [Uuid].
-  bool get isRandom => version == 4;
 
   @override
   int get hashCode => data.hashCode;
@@ -111,6 +99,12 @@ class Uuid {
       sb.write(data[i].toRadixString(16).padLeft(2, "0").toLowerCase());
     return sb.toString();
   }
+
+  /// Returns the version number of [this].
+  int get version => data[6] >> 4;
+
+  /// Returns true if this is a random or pseudo-random [Uuid].
+  bool get isRandom => version == 4;
 
   // Variant returns UUID layout variant.
   UuidVariant get variant {
@@ -160,90 +154,56 @@ class Uuid {
 
   /// Returns [true] if [s] is a valid [Uuid] for [version]. If
   /// [version] is [null] returns [true] for any valid version.
-  static bool isValidString(String s, [int version]) =>
-      _isValidUuidString(s, version);
+  static bool isValidString(String s, [int version]) => isValidUuidString(s, version);
 
-  static bool isNotValidString(String s, [int version]) =>
-      !isValidString(s, version);
+  static bool isNotValidString(String s, [int version]) => !isValidString(s, version);
 
   /// Returns [true] if [s] is a valid [Uuid] for [version]. If
   /// [version] is [null] returns [true] for any valid version.
-  static bool isValidData(List<int> data, [int version]) =>
-      __isValidUuidData(data, version);
+  static bool isValidData(List<int> data, [int version]) => _isValidUuid(data, version);
 
   static bool isNotValidData(List<int> data, [int version]) =>
       !isValidData(data, version);
 
-  /// Parses [s], which must be in UUID format, and returns
-  /// a [Uint8List] 16 bytes long containing the value
-  /// of the [Uuid]. Returns [null] if [s] is not valid.
-  static Uint8List parseToBytes(String s,
-      {Uint8List data, Uint8List Function(String) onError}) {
-    if (s.length == 36) return _parseToBytes(s, data: data, onError: onError);
-    if (s.length == 32) return _parseNoDashesToBytes(s, data: data, onError:
-    onError);
-    return (onError != null) ? onError(s) : throw new InvalidUuidStringError(s);
-  }
-
   /// Returns a Uuid created from [s], if [s] is in valid Uuid format;
   /// otherwise, if [onError] is not [null] calls [onError]([s])
   /// and returns its value. If [onError] is [null], then a
-  /// [InvalidUuidError] is thrown.
-  static Uuid parse(String s,
-      {Uint8List data, Uuid Function(String) onError}) {
-    Uint8List bytes = Uuid.parseToBytes(s, data: data, onError: onError);
-    // Note: if error occurred it will be thrown by [parseToBytes].
-    return (bytes == null) ? null : new Uuid.fromList(bytes);
+  /// [InvalidUuidListError] is thrown.
+  static Uuid parse(String s, {Uint8List data, OnUuidParseToBytesError onError}) {
+    Uint8List bytes = _parseToBytes(s, data, onError, kUuidStringLength);
+    return (bytes == null && onError != null) ? onError(s) : new Uuid.fromList(bytes);
   }
 }
 
 // **** Internal Procedures ****
 
 const int kVersion = 4;
-const int kLengthInBytes = 16;
-const int kLengthAsString = 36;
-const int kLengthInUidString = 32;
+const int kDataLengthInBytes = 16;
 
 // **** Utility functions for binary UUID values
-
-Uint8List _getBytes(Random rng) {
-  Uint8List bytes = new Uint8List(16);
-  Uint32List int32 = bytes.buffer.asUint32List();
-  for (int i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
-  _setToVersion4(bytes);
-  return bytes;
-}
 
 /// This only validates ISO (IETF) [Uuid]s, i.e. those with Variant value = 2.
 bool _isValidUuid(List<int> bytes, [int version]) {
   if (version != null && (version < 1 || version > 5))
     throw 'Invalid version number: $version';
-  bool ok = list.length == 16 && _isISOVariant && _hasValidVersion(bytes);
+  bool ok = bytes.length == 16 && _isISOVariant(bytes) && _hasValidVersion(bytes);
   if (!ok || (version != null && _version != version)) return false;
-  if (v != 5 || v != 3) return true;
+  if (version != 5 || version != 3) return true;
   //Enhancement
   // In order to do this we need getters and setters for the various fields.
   throw new UnimplementedError('Version 3 & 5 UUIDs are not yet supported');
 }
 
 int _getVariant(Uint8List bytes) => bytes[8] >> 6;
-bool _isISOVariant(Uint8List bytes) =>  _getVariant(bytes) == 2;
+bool _isISOVariant(Uint8List bytes) => _getVariant(bytes) == 2;
 
 int _version(Uint8List bytes) => bytes[6] >> 4;
 
 bool _isVersion4(Uint8List bytes) => bytes[6] >> 4 == 4;
-bool _hasValidVersion(Uint8List bytes) =>
-    _uuidVersion(bytes) > 0 && _uuidVersion(bytes) < 6;
+bool _hasValidVersion(Uint8List bytes) => _version(bytes) > 0 && _version(bytes) < 6;
 
 bool _isValidV4List(Uint8List bytes) =>
-    bytes.length == 16 && _isISOVariant && _isVersion4(bytes);
-
-void _setVersion(List<int> bytes) => (bytes[6] & 0x0f) | 0x40;
-
-void _setVariantToIETF(List<int> bytes) => (bytes[8] & 0xbf) | 0x80;
-void _setVariantToNCS(List<int> bytes) => bytes[8] | 0x80;
-void _setVariantToMicrosoft(List<int> bytes) => (bytes[8] & 0x1f) | 0xC0;
-void _setVariantToReserved(List<int> bytes) => (bytes[8] & 0x1f) | 0xE0;
+    bytes.length == 16 && _isISOVariant(bytes) && _isVersion4(bytes);
 
 // Converts uuid data to valid ISO Variant and Version 4.
 // _Note_: Does not check that length == 16.
@@ -251,141 +211,58 @@ void _setToVersion4(Uint8List bytes) {
   bytes[6] = (bytes[6] & 0x0f) | 0x40;
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
 }
+
 //TODO: Unit Test Error handling
-Uint8List _listToBytes(List<int> data,
-    {Uint8List Function(List<int>) onError, bool coerce = true}) {
-  if (data.length != 16) return _uuidErrorHandler(list);
-  Uint8List bytes = _getDataBuffer(data, onError);
-  print('coerce: $coerce');
+Uint8List _listToBytes(List<int> data, {bool coerce = true}) {
+  if (data.length != 16)
+    return invalidUuidListError(data, 'Invalid Length(${data.length})');
+  Uint8List bytes = _getDataBuffer(data);
   if (coerce) _setToVersion4(bytes);
   return bytes;
 }
 
-// **** String functions for UUID [String]s.
-
-// Regular expression used for basic parsing of the uuid.
-const pattern =
-    r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-4][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$';
-
-// General pattern is:
-//   xxxxxxxx-xxxx-Vxxx-Nxxx-xxxxxxxxxxxx
-//   dashes |8   |13  |18  |23
-// where V is version, and N is node.
-
-/// The offsets of the 4 dashes in a UUID [String}.
-const List<int> kDashes = const <int>[8, 13, 18, 23];
-
-/// The offsets of the start of the hex values in a UUID [String].
-const List<int> kStarts = const <int>[0, 9, 14, 19, 24];
-
-/// The offsets of the end of the hex values in a UUID [String].
-const List<int> kEnds = const <int>[8, 13, 18, 23, kLengthAsString];
-
-/// The ASCII value for the dash (-) character.
-const int kDash = 0x2D;
-
-// Returns [true] if [uuidString] is a valid [Uuid]. If [type] is [null]
-/// it just validates the format; otherwise, [type] must have a value
-/// between 1 and 5.
-bool _isValidUuidString(String uuidString, [int type]) {
-  if (uuidString.length != kLengthAsString) return false;
-  for (int pos in kDashes)
-    if (uuidString.codeUnitAt(pos) != kDash) return false;
-  var s = uuidString.toLowerCase();
-  for (int i = 0; i < kStarts.length; i++) {
-    var start = kStarts[i];
-    var end = kEnds[i];
-    for (int j = start; j < end; j++) {
-      int c = s.codeUnitAt(j);
-      if (!isHexChar(c)) return false;
-    }
-  }
-  return (type == null) ? true : _isValidStringVersion(s, type);
-}
-
-// The most significant bit of octet 8: 1 0 x
-/// Returns the UUID Version number from a UUID [String].
-/// Extracts the version from the UUID, which is (by definition) the M in
-///    xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
-/// The version is equal to the 'M' in the format above. It must have
-/// a value between 1 and 4 inclusive.
-String _getVersionAsString(String s) => s[14];
-
-int _getVersionNumberFromString(String s) => s.codeUnitAt(14) - k0;
-
-const List<int> _kISOVariantAsLetter = const <int>[k8, k9, ka, kb];
-
-bool _isISOVariantFromString(String s) {
-  int subType = s.codeUnitAt(19);
-  return _kISOVariantAsLetter.indexOf(subType) != -1;
-}
-
-/// Returns [true]
-bool _isValidStringVersion(String s, int version) {
-  if (version < 1 || version > 5) throw 'Invalid version number: $version';
-  int _version = _getVersionNumberFromString(s);
-  print('v: $_version');
-  if (!_isISOVariantFromString(s) || _version != version) return false;
-  // For certain versions, the checks we did up to this point are fine.
-  if (_version != 3 || _version != 5) return true;
-  throw new UnimplementedError('Version 3 & 5 are not yet implemented');
-  return false;
-}
-
 /// Parses the [String] [s] into a list of byte values.
 /// Can optionally be provided a [Uint8List] to write into and
 /// a positional [offset] for where to start inputting into the buffer.
-Uint8List _parseToBytes(String s,
-    {Uint8List data, Null Function(Uuid) onError}) {
-  if (s == null || s.length != kLengthAsString) return _uuidErrorHandler(s,
-      kLengthAsString,
-      onError);
-  var bytes = _getDataBuffer(data, onError);
+Uint8List _parseToBytes(
+    String s, Uint8List data, OnUuidBytesError onError, int targetLength) {
+  if (s == null || s.length != targetLength)
+    return invalidUuidParseToBytesError(s, targetLength);
+  var bytes = _getDataBuffer(data);
   try {
-    _toBytes(s, bytes, 0, 0, 8);
-    _toBytes(s, bytes, 4, 9, 13);
-    _toBytes(s, bytes, 6, 14, 18);
-    _toBytes(s, bytes, 8, 19, 23);
-    _toBytes(s, bytes, 10, 24, kLengthAsString);
+    if (targetLength == 36) {
+      _toBytes(s, bytes, 0, 0, 8);
+      _toBytes(s, bytes, 4, 9, 13);
+      _toBytes(s, bytes, 6, 14, 18);
+      _toBytes(s, bytes, 8, 19, 23);
+      _toBytes(s, bytes, 10, 24, kUuidStringLength);
+    } else if (targetLength == kUuidAsUidStringLength) {
+      _toBytes(s, bytes, 0, 0, kUuidAsUidStringLength);
+    } else {
+      return invalidUuidStringLengthError(s, targetLength);
+    }
   } catch (e) {
-    return _uuidErrorHandler(s, kLengthAsString, onError);
+    return invalidUuidCharacterError(s, e.msg);
   }
   return bytes;
 }
 
-/// Parses the [String] [s] into a list of byte values.
-/// Can optionally be provided a [Uint8List] to write into and
-/// a positional [offset] for where to start inputting into the buffer.
-Uint8List _parseNoDashesToBytes(String s, {Uint8List data, Uint8List onError}) {
-  if (s == null, || s.length != 32) return _uuidErrorHandler(s, 32, onError);
-  var bytes = _getDataBuffer(data, onError);
-  return _toBytes(s, bytes, 0, 0, 32);
-}
-
-/// Returns a valid [Uuid] data buffer. If [data] is [null] a new
-/// data buffer is created. If [data] is not [null] and has [length]
+/// Returns a valid [Uuid] data buffer. If [bytes] is [null] a new
+/// data buffer is created. If [bytes] is not [null] and has [length]
 /// 16, it is returned; otherwise, [_uuidErrorHandler] is called
 /// with [onError] as its argument.
-Uint8List _getDataBuffer(List<int> data, Null Function(Uuid) onError) {
-  if (data == null) return new Uint8List(16);
-  if (data.length != 16) return _uuidErrorHandler(onError);
-  if (data is Uint8List) return data;
-  return new Uint8List.fromList(data);
-}
-
-/// All parsing errors call this handler.  This should be the only
-/// function in this file that [throw]s.
-Null _uuidErrorHandler(String s, int targetLength, String Function(String) handler) {
-  String msg = 'Invalid character in String';
-  if (s == null) msg = 'Invalid: String is null';
-  if (s.length != length) 'Invalid String length(${s.length} should be $length';
-  return (handler != null) ? onError(s) : throw new InvalidUuidError(s, msg);
+Uint8List _getDataBuffer(List<int> bytes) {
+  if (bytes == null) return new Uint8List(16);
+  if (bytes.length != 16)
+    return invalidUuidListError(bytes, 'Invalid Uuid List length: ${bytes.length}');
+  if (bytes is Uint8List) return bytes;
+  return new Uint8List.fromList(bytes);
 }
 
 /// Converts characters from a String into the corresponding byte values.
 void _toBytes(String s, Uint8List bytes, int byteIndex, int start, int end) {
   for (int i = start; i < end; i += 2) {
-    if (!isHexChar(s.codeUnitAt(i))) throw 'Bad UUID String: $s';
+    if (!isHexChar(s.codeUnitAt(i))) throw 'Bad UUID character: ${s[i]}';
     bytes[byteIndex++] = _hexToByte[s.substring(i, i + 2)];
   }
 }
@@ -405,15 +282,6 @@ String _toUuidFormat(Uint8List bytes, bool useUppercase) {
       '${byteToHex[bytes[i++]]}${byteToHex[bytes[i++]]}'
       '${byteToHex[bytes[i++]]}${byteToHex[bytes[i++]]}'
       '${byteToHex[bytes[i++]]}${byteToHex[bytes[i++]]}';
-}
-
-/// Unparses (converts) a [Uuid]'s [Uint8List] value to a 32-character
-/// [String] without dashes.
-String _toUuidString(Uint8List bytes) {
-  StringBuffer sb = new StringBuffer();
-  List<String> byteToHex = (useUppercase) ? _byteToUppercaseHex : _byteToLowercaseHex;
-  for (int i = offset; i < offset + 16; i++) sb.write(byteToHex[bytes[i]]);
-  return sb.toString();
 }
 
 String _toUidString(Uint8List bytes, bool useUppercase) =>
@@ -456,7 +324,6 @@ const List<String> _byteToLowercaseHex = const [
   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
   "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff"
 ];
-
 
 /// Returns the Hex [String] equivalent to an 8-bit [int].
 const List<String> _byteToUppercaseHex = const [
