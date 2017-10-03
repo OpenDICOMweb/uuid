@@ -19,7 +19,7 @@ typedef Uint8List OnUuidBytesError(List<int> iList);
 typedef Uuid OnUuidParseError(String s);
 typedef Uint8List OnUuidParseToBytesError(String s);
 
-enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
+enum UuidVariant { ncs, rfc4122, microsoft, reserved }
 
 enum GeneratorType { secure, pseudo, seededPseudo }
 
@@ -36,8 +36,6 @@ enum GeneratorType { secure, pseudo, seededPseudo }
 /// where each x is replaced with a random hexadecimal digit
 /// from 0 to f, and y is replaced with a random hexadecimal
 /// digit from 0x8 to  0xb, (i.e. 0x8, 0x9, 0xa, or 0xb).
-///
-/// Use [UuidV4Generator] for more control over the RNG used.
 ///
 /// See https://api.dartlang.org/stable/dart-math/Random-class.html.
 class Uuid {
@@ -69,7 +67,7 @@ class Uuid {
   bool operator ==(Object other) {
     if (other is Uuid) {
       if (data.length != other.data.length) return false;
-      for (int i = 0; i < kDataLengthInBytes; i++)
+      for (var i = 0; i < kDataLengthInBytes; i++)
         if (data[i] != other.data[i]) return false;
       return true;
     }
@@ -95,7 +93,7 @@ class Uuid {
   /// the dashes ('-') that are present in the UUID format.
   String get asHex {
     var sb = new StringBuffer();
-    for (int i = 0; i < data.length; i++)
+    for (var i = 0; i < data.length; i++)
       sb.write(data[i].toRadixString(16).padLeft(2, "0").toLowerCase());
     return sb.toString();
   }
@@ -110,8 +108,8 @@ class Uuid {
   UuidVariant get variant {
     if ((data[8] & 0x80) == 0x00) return UuidVariant.ncs;
     if (((data[8] & 0xc0) | 0x80) == 0x80) return UuidVariant.rfc4122;
-    if (((data[8] & 0xe0) | 0xc0) == 0xc0) return UuidVariant.Microsoft;
-    return UuidVariant.Microsoft;
+    if (((data[8] & 0xe0) | 0xc0) == 0xc0) return UuidVariant.microsoft;
+    return UuidVariant.microsoft;
   }
 
   /// Returns the [Uuid] [String] that corresponds to [this].  By default,
@@ -169,8 +167,8 @@ class Uuid {
   /// otherwise, if [onError] is not [null] calls [onError]([s])
   /// and returns its value. If [onError] is [null], then a
   /// [InvalidUuidListError] is thrown.
-  static Uuid parse(String s, {Uint8List data, OnUuidParseToBytesError onError}) {
-    Uint8List bytes = _parseToBytes(s, data, onError, kUuidStringLength);
+  static Uuid parse(String s, {Uint8List data, OnUuidParseError onError}) {
+    Uint8List bytes = _parseToBytes(s, data, (s) => null, kUuidStringLength);
     return (bytes == null && onError != null) ? onError(s) : new Uuid.fromList(bytes);
   }
 }

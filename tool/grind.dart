@@ -53,14 +53,14 @@ Future unittest() async {
 /// Do a Dry Run of dartfmt.
 @Task('Dry Run of Formating Source...')
 void fmtdryrun() {
-  log("Formatting Source...");
+  log('Formatting Source...');
   DartFmt.dryRun('lib', lineLength: 80);
 }
 
 /// Format all dart sources in core package.
 @Task('Formating Source...')
 void format() {
-  log("Formatting Source...");
+  log('Formatting Source...');
   DartFmt.format('.', lineLength: 80);
 }
 
@@ -74,7 +74,7 @@ Directory dartDocDir = new Directory('C:/odw/sdk/doc/core');
 @Task('DartDoc')
 void tester() {
   log('Generating Documentation...');
-  String s = sdkBin("dartdoc");
+  String s = sdkBin('dartdoc');
   s = s.replaceAll('\\', '/');
   print('$s');
 }
@@ -95,18 +95,18 @@ void dartdoc() {
 @Task('Build the project.')
 //TODO: test
 void build() {
-  log("Building...");
+  log('Building...');
   Pub.get();
-  Pub.build(mode: "debug");
+  Pub.build(mode: 'debug');
 }
 
 /// Build and Release the core
 //TODO: test
 @Task('Building release...')
 void buildRelease() {
-  log("Building release...");
+  log('Building release...');
   Pub.upgrade();
-  Pub.build(mode: "release");
+  Pub.build(mode: 'release');
 }
 
 /// Compile the core package using Dart Development Compiler (dartdevc).
@@ -114,7 +114,7 @@ void buildRelease() {
 @Task('Compiling...')
 //@Depends(init)
 void compile() {
-  log("Dart Dev Compiler: Compiling...");
+  log('Dart Dev Compiler: Compiling...');
   String dartDevCOutPath = 'dart_dev_output';
   Directory dartDevCOutputDir = new Directory(dartDevCOutPath);
   new DevCompiler().compile('lib', dartDevCOutputDir);
@@ -132,7 +132,7 @@ void testJavaScript() {
 /// Clean the core package. Used before release.
 @Task('Cleaning...')
 void clean() {
-  log("Cleaning...");
+  log('Cleaning...');
   delete(buildDir);
   delete(dartDocDir);
 }
@@ -143,7 +143,7 @@ void clean() {
 //TODO: decide where this should be deployed to. GitHub, ACR, ...
 @Depends(clean, format, compile, buildRelease, unittest, testJavaScript)
 void deploy() {
-  log("Deploying...");
+  log('Deploying...');
   log('Regenerating Documentationfrom scratch...');
   delete(dartDocDir);
   dartdoc();

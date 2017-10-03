@@ -7,22 +7,22 @@
 import 'package:uuid/uuid.dart';
 
 void main() {
-  var data = generateData();
+  final data = generateData();
   print(data);
-  var test = generateTest();
+  final test = generateTest();
   print(test);
 }
 
 String generateData() {
   var out = header;
-  List<String> sList = <String>[];
-  List<String> dList = <String>[];
-  List<Uuid> rUuids = <Uuid>[];
-  List<String> sUuids = <String>[];
-  List<String> dUuids = <String>[];
+  final sList = <String>[];
+  final dList = <String>[];
+  final rUuids = <Uuid>[];
+  final sUuids = <String>[];
+  final dUuids = <String>[];
 
   for (int i = 0; i < 10; i++) {
-    var uuid = new Uuid();
+    final uuid = new Uuid();
     // Random Uuids
     rUuids.add(uuid);
     // List of Uuid Strings
@@ -33,7 +33,7 @@ String generateData() {
     dUuids.add('uuidD${i}');
     // List of [Uuid]s generated from Strings.
     sUuids.add('uuidS${i}');
-    var data = uuid.data;
+    final data = uuid.data;
     out += '  // $i: data\n';
 
     out += dataToString("data$i", data);
@@ -54,14 +54,16 @@ String generateData() {
 String generateTest() {
   var out = header;
   out += program;
+  var sb = new StringBuffer(out);
   for (int i = 0; i < 10; i++) {
-    out += 'expect(uuidD${i} == uuidS${i}, true);\n';
-    out += 'version = s${i}[14];\n';
-    out += 'log.debug("version: \$version");\n';
-    out += 'expect(s${i}[14] == "4", true);\n';
-    out += 'type = s${i}[19];\n';
-    out += 'log.debug("type: \$type");\n';
-    out += 'expect(typeChars.contains(s${i}[19]), true);\n\n';
+    sb
+      ..write('expect(uuidD${i} == uuidS$i, true);\n')
+      ..write('version = s$i[14];\n')
+      ..write('log.debug("version: \$version");\n')
+      ..write('expect(s$i[14] == "4", true);\n')
+      ..write('type = s$i[19];\n')
+      ..write('log.debug("type: \$type");\n')
+      ..write('expect(typeChars.contains(s$i[19]), true);\n\n');
   }
   out += trailer;
   print(out);
@@ -88,21 +90,18 @@ import 'package:uuid/uuid_w_seed.dart';
 ''';
 
 String stringListToString(String id, List<String> sList) {
-  var out = 'List<String> $id = <String>[\n    ';
-  out += sList.join(',\n    ');
-  return out += '  \n  ];\n\n';
+  final list = sList.join(',\n    ');
+  return 'List<String> $id = <String>[\n    $list\n  ];\n\n';
 }
 
 String dataListToString(String id, List<String> dList) {
-  var out = 'List<List<int>>  $id = <List<int>>[\n    ';
-  out += dList.join(', ');
-  return out += '  \n  ];\n\n';
+  final list = dList.join(', ');
+  return 'List<List<int>>  $id = <List<int>>[\n    $list\n  ];\n\n';
 }
 
 String uuidListToString(String id, List<String> uList) {
-  var out = 'List<Uuid>  $id = <Uuid>[\n    ';
-  out += uList.join(', ');
-  return out += '  \n  ];\n\n';
+  final list = uList.join(', ');
+  return 'List<Uuid>  $id = <Uuid>[\n    $list  \n  ];\n\n';
 }
 
 String program = '''

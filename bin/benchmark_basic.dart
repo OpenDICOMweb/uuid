@@ -14,7 +14,7 @@ const int length = 10000;
 
 // Create a new benchmark by extending BenchmarkBase.
 class TemplateBenchmark extends BenchmarkBase {
-  const TemplateBenchmark() : super("Template");
+  const TemplateBenchmark() : super('Template');
 
   static void main() {
     const TemplateBenchmark().report();
@@ -35,7 +35,7 @@ class TemplateBenchmark extends BenchmarkBase {
     // Uuid.initialize(isSecure: false, seed: 0);
     uuids = new List<Uuid>(length);
     strings = new List<String>(length);
-    for (int i = 0; i < length; i++) {
+    for (var   i = 0; i < length; i++) {
       uuids[i] = new Uuid();
       strings[i] = uuids[i].toString();
     }

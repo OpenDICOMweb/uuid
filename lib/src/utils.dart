@@ -17,9 +17,9 @@ String _toUuidString(Uint8List bytes, {int offset = 0, bool useUppercase = false
 }*/
 
 Uint8List _getBytes(Random rng) {
-  Uint8List bytes = new Uint8List(16);
-  Uint32List int32 = bytes.buffer.asUint32List();
-  for (int i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
+  final bytes = new Uint8List(16);
+  final int32 = bytes.buffer.asUint32List();
+  for (var i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
   _setToVersion4(bytes);
   return bytes;
 }
