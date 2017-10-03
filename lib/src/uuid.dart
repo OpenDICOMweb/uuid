@@ -16,8 +16,8 @@ import 'errors.dart';
 import 'v4generator.dart';
 
 typedef Uint8List OnUuidBytesError(List<int> iList);
-typedef Uuid OnUuidParseError(String);
-typedef Uint8List OnUuidParseToBytesError(String);
+typedef Uuid OnUuidParseError(String s);
+typedef Uint8List OnUuidParseToBytesError(String s);
 
 enum UuidVariant { ncs, rfc4122, Microsoft, reserved }
 

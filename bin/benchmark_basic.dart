@@ -17,14 +17,14 @@ class TemplateBenchmark extends BenchmarkBase {
   const TemplateBenchmark() : super("Template");
 
   static void main() {
-    new TemplateBenchmark().report();
+    const TemplateBenchmark().report();
     Uuid.setGenerator(GeneratorType.secure);
   }
 
   // The benchmark code.
   @override
   void run() {
-    for (int i = 0; i < length; i++)
+    for (var i = 0; i < length; i++)
       //uuids[i].toString();
       Uuid.parse(strings[i]);
   }

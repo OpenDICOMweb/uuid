@@ -21,7 +21,7 @@ class InvalidUuidListError extends Error {
 			'InvalidUuidListError: $msg: $bytes';
 }
 
-Uint8List invalidUuidListError(List<int> iList, msg) {
+Uint8List invalidUuidListError(List<int> iList, String msg) {
 	log.error(msg);
 	if (throwOnError) throw new InvalidUuidListError(iList, msg);
 	return null;
