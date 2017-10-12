@@ -14,50 +14,46 @@ void main() {
 }
 
 String generateData() {
-  var out = header;
   final sList = <String>[];
   final dList = <String>[];
   final rUuids = <Uuid>[];
   final sUuids = <String>[];
   final dUuids = <String>[];
 
-  for (int i = 0; i < 10; i++) {
+  final sb = new StringBuffer(header);
+  for (var i = 0; i < 10; i++) {
     final uuid = new Uuid();
     // Random Uuids
     rUuids.add(uuid);
     // List of Uuid Strings
     sList.add('"$uuid.asString"');
     // List of [Uuid] data
-    dList.add("data$i");
+    dList.add('data$i');
     // List of [Uuid]s generated from a data list
-    dUuids.add('uuidD${i}');
+    dUuids.add('uuidD$i');
     // List of [Uuid]s generated from Strings.
-    sUuids.add('uuidS${i}');
+    sUuids.add('uuidS$i');
     final data = uuid.data;
-    out += '  // $i: data\n';
-
-    out += dataToString("data$i", data);
-
-    out += 'String s$i = "${uuid.asString}";\n';
-    out += 'Uuid uuidD${i} = new Uuid.fromList(data$i);\n';
-    out += 'Uuid uuidS${i} = Uuid.parse(s$i);\n\n';
+    sb
+      ..write('  // $i: data\n')
+      ..write(dataToString('data$i', data))
+      ..write('String s$i = "${uuid.asString}";\n')
+      ..write('Uuid uuidD$i = new Uuid.fromList(data$i);\n')
+      ..write('Uuid uuidS$i = Uuid.parse(s$i);\n\n');
   }
-  out += stringListToString('sList', sList);
-  out += dataListToString('dList', dList);
-  out += uuidListToString('dUuids', dUuids);
-  out += uuidListToString('sUuids', sUuids);
-
-  print(out);
-  return out;
+  sb
+    ..write(stringListToString('sList', sList))
+    ..write(dataListToString('dList', dList))
+    ..write(uuidListToString('dUuids', dUuids))
+    ..write(uuidListToString('sUuids', sUuids));
+  return sb.toString();
 }
 
 String generateTest() {
-  var out = header;
-  out += program;
-  var sb = new StringBuffer(out);
-  for (int i = 0; i < 10; i++) {
+  final sb = new StringBuffer('$header$program');
+  for (var i = 0; i < 10; i++) {
     sb
-      ..write('expect(uuidD${i} == uuidS$i, true);\n')
+      ..write('expect(uuidD$i == uuidS$i, true);\n')
       ..write('version = s$i[14];\n')
       ..write('log.debug("version: \$version");\n')
       ..write('expect(s$i[14] == "4", true);\n')
@@ -65,9 +61,8 @@ String generateTest() {
       ..write('log.debug("type: \$type");\n')
       ..write('expect(typeChars.contains(s$i[19]), true);\n\n');
   }
-  out += trailer;
-  print(out);
-  return out;
+  sb.write(trailer);
+  return sb.toString();
 }
 
 String dataToString(String id, List<int> iList) => '''
@@ -107,7 +102,7 @@ String uuidListToString(String id, List<String> uList) {
 String program = '''
 /// Assert that the data above are valid.
 void main() {
-  const List<String> typeChars = const <String>["8", "9", "a", "b"];
+  const List<String> typeChars = const <String>['8', '9', 'a', 'b'];
   
   String version;
   String type;

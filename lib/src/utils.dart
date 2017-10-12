@@ -4,17 +4,20 @@
 // Original author: Jim Philbin <jfphilbin@gmail.edu> - 
 // See the AUTHORS file for other contributors.
 
+/*  Flush at V0.9.0 if not needed
 import 'dart:math';
 import 'dart:typed_data';
 
-/*/// Unparses (converts) a [Uuid]'s [Uint8List] value to a 32-character
+/// Unparses (converts) a [Uuid]'s [Uint8List] value to a 32-character
+
 /// [String] without dashes.
 String _toUuidString(Uint8List bytes, {int offset = 0, bool useUppercase = false}) {
 	StringBuffer sb = new StringBuffer();
 	List<String> byteToHex = (useUppercase) ? _byteToUppercaseHex : _byteToLowercaseHex;
 	for (int i = offset; i < offset + 16; i++) sb.write(byteToHex[bytes[i]]);
 	return sb.toString();
-}*/
+}
+
 
 Uint8List _getBytes(Random rng) {
   final bytes = new Uint8List(16);
@@ -23,6 +26,7 @@ Uint8List _getBytes(Random rng) {
   _setToVersion4(bytes);
   return bytes;
 }
+/
 
 
 // Converts uuid data to valid ISO Variant and Version 4.
@@ -46,3 +50,4 @@ void _setVariantToReserved(List<int> bytes) => (bytes[8] & 0x1f) | 0xE0;
 /// The version is equal to the 'M' in the format above. It must have
 /// a value between 1 and 4 inclusive.
 String _getVersionAsString(String s) => s[14];
+*/

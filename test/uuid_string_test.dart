@@ -14,26 +14,24 @@ import 'data.dart';
 const String uuidV1 = '23d57c30-afe7-11e4-ab7d-12e3f512a338';
 const String uuidV4 = '09bb1d8c-4965-4788-94f7-31b151eaba4e';
 
-
 const List<int> uuidList = const <int>[
   149, 236, 195, 128, 175, 233, 17, 228, // No reformat
   155, 108, 117, 27, 102, 221, 84, 30
 ];
 
-final uuidBytes = new Uint8List.fromList(uuidList);
+final Uint8List uuidBytes = new Uint8List.fromList(uuidList);
 
 void main() {
   Server.initialize(name: 'uuid_string_test', level: Level.info0);
   group('Uuid Tests', () {
-
     // The data in this test is in data.dart
     test('Uuid Test with seed', () {
       log.debug('seed: ${Uuid.seed}');
-      Uuid uuid0 = new Uuid.seededPseudo();
+      final uuid0 = new Uuid.seededPseudo();
       log.debug('Uuid: $uuid0');
       expect(uuid0.asString, equals(s0));
 
-      Uuid uuid1 = new Uuid.seededPseudo();
+      final uuid1 = new Uuid.seededPseudo();
       log.debug('Uuid: $uuid1');
       expect(uuid1.asString, equals(s1));
     });
@@ -53,8 +51,7 @@ void main() {
       //denies if wrong version
       expect(Uuid.isValidString(uuidV1, 4), false);
 
-      log.debug(uuidList);
-      log.debug(uuidBytes);
+      log..debug(uuidList)..debug(uuidBytes);
       expect(uuidList != uuidBytes, true);
 
       //accepts valid List

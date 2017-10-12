@@ -8,6 +8,16 @@ import 'dart:typed_data';
 
 import 'package:system/system.dart';
 
+class UuidError extends Error {
+
+	String msg;
+
+	UuidError(this.msg);
+
+	@override
+	String toString() => 'InvalidUuidListError: $msg';
+}
+
 class InvalidUuidListError extends Error {
   List<int> bytes;
   String msg;
@@ -27,10 +37,10 @@ Uint8List invalidUuidListError(List<int> iList, String msg) {
   return null;
 }
 
-class InvalidUuidParseError extends Error {
+class UuidParseError extends Error {
   String msg;
 
-  InvalidUuidParseError(this.msg);
+  UuidParseError(this.msg);
 
   @override
   String toString() => message(msg);
@@ -40,7 +50,7 @@ class InvalidUuidParseError extends Error {
 
 Uint8List invalidUuidParseError(String msg) {
   log.error(msg);
-  if (throwOnError) throw new InvalidUuidParseError(msg);
+  if (throwOnError) throw new UuidParseError(msg);
   return null;
 }
 

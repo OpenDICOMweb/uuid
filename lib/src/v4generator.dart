@@ -30,11 +30,11 @@ class V4Generator {
   V4Generator._(this.rng, {this.isSecure: false, this.seed});
 
   /// Returns a new random (V4) UUID value.
-  /// _Note_: The value is a [Uint8List], not a [Uuid].
+  /// _Note_: The value is a [Uint8List], not a Uuid.
   Uint8List get next {
-    Uint8List bytes = new Uint8List(16);
-    Uint32List int32 = bytes.buffer.asUint32List();
-    for (int i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
+    final bytes = new Uint8List(16);
+    final int32 = bytes.buffer.asUint32List();
+    for (var i = 0; i < 4; i++) int32[i] = rng.nextInt(0xFFFFFFFF);
     // Set the version and variant bits to the correct values.
       bytes[6] = bytes[6] >> 4 | 0x40;
       bytes[8] = bytes[8] >> 2 | 0x80;
@@ -45,15 +45,15 @@ class V4Generator {
   static final Random _rngBasic = new Random();
   static final Random _rngTest = new Random(0);
 
-  /// Generates a series of random (secure) [Uuid]s.
-  static final secure = new V4Generator._(_rngSecure, isSecure: true);
+  /// Generates a series of random (secure) Uuids.
+  static final V4Generator secure = new V4Generator._(_rngSecure, isSecure: true);
 
-  /// Generates a series of pseudo-random [Uuid]s.
+  /// Generates a series of pseudo-random Uuids.
   /// _Note_: No [seed] is used. This is faster than
   /// [secure] and can be used for testing.
-  static final pseudo = new V4Generator._(_rngBasic);
+  static final V4Generator pseudo = new V4Generator._(_rngBasic);
 
-  /// Generates a reproducible series of pseudo-random [Uuid]s.
+  /// Generates a reproducible series of pseudo-random Uuids.
   /// The [seed] used is 1.
-  static final seededPseudo = new V4Generator._(_rngTest, seed: 0);
+  static final V4Generator seededPseudo = new V4Generator._(_rngTest, seed: 0);
 }

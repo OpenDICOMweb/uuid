@@ -6,7 +6,7 @@
 
 import 'package:system/system.dart';
 import 'package:system/server.dart';
-import "package:test/test.dart";
+import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
 
 import 'data.dart';
@@ -18,9 +18,8 @@ void main() {
 
   group('Version 4 Tests', () {
     test('Check if V4 is consistent using a seed', () {
-      var uuid0 = new Uuid.seededPseudo();
-      log.debug('uuid0: $uuid0');
-      log.debug('data0: $data0');
+      final uuid0 = new Uuid.seededPseudo();
+      log..debug('uuid0: $uuid0')..debug('data0: $data0');
 
       expect(uuid0.data.length, equals(16));
       expect(uuid0, equals(uuidD0));
@@ -28,41 +27,36 @@ void main() {
     });
 
     test('Test Uuid.fromBytes', () {
-      const List<int> data0 = const <int>[
+      const data0 = const <int>[
         0x10, 0x91, 0x56, 0xbe, 0xc4, 0xfb, 0xc1, 0xea,
         0x71, 0xb4, 0xef, 0xe1, 0x67, 0x1c, 0x58, 0x36 // No Reformat
       ];
-      const String string0 = "109156be-c4fb-41ea-b1b4-efe1671c5836";
+      const string0 = '109156be-c4fb-41ea-b1b4-efe1671c5836';
 
       log.debug('data0: $data0');
-      Uuid uuid0 = new Uuid.fromList(data0, coerce: true);
+      final uuid0 = new Uuid.fromList(data0, coerce: true);
 
-      log.debug('  uuid0: $uuid0');
-      log.debug('string0: $string0');
+      log..debug('  uuid0: $uuid0')..debug('string0: $string0');
       expect(uuid0.toString(), equals(string0));
     });
 
     test('Make sure that really fast uuid.v4 doesn\'t produce duplicates', () {
-      var list =
-          new List.filled(1000, null).map((something) => new Uuid()).toList();
-      var setList = list.toSet();
+      final list = new List.filled(1000, null).map((something) => new Uuid()).toList();
+      final setList = list.toSet();
       log.debug('setList:$setList');
       expect(list.length, equals(setList.length));
     });
   });
 
   group('[Parse/Unparse Tests]', () {
-
     test('Parsing a UUID', () {
       // Note: s0 and s1 are different at position 14.
-      String s0 = '00112233-4455-6677-8899-aabbccddeeff';
-      String s1 = '00112233-4455-4677-8899-aabbccddeeff';
+      final s0 = '00112233-4455-6677-8899-aabbccddeeff';
+      final s1 = '00112233-4455-4677-8899-aabbccddeeff';
       //           --------------^---------------------
 
-      var uuid = Uuid.parse(s0, onError: (id) => null);
-      log.debug('  s0: $s0');
-      log.debug('uuid: ${uuid.asString}');
-      log.debug('  s1: $s1');
+      final uuid = Uuid.parse(s0, onError: (id) => null);
+      log..debug('  s0: $s0')..debug('uuid: ${uuid.asString}')..debug('  s1: $s1');
       expect(uuid.toString(), equals(s1));
     });
   });

@@ -74,7 +74,7 @@ Directory dartDocDir = new Directory('C:/odw/sdk/doc/core');
 @Task('DartDoc')
 void tester() {
   log('Generating Documentation...');
-  String s = sdkBin('dartdoc');
+  var s = sdkBin('dartdoc');
   s = s.replaceAll('\\', '/');
   print('$s');
 }
@@ -115,8 +115,8 @@ void buildRelease() {
 //@Depends(init)
 void compile() {
   log('Dart Dev Compiler: Compiling...');
-  String dartDevCOutPath = 'dart_dev_output';
-  Directory dartDevCOutputDir = new Directory(dartDevCOutPath);
+  final dartDevCOutPath = 'dart_dev_output';
+  final dartDevCOutputDir = new Directory(dartDevCOutPath);
   new DevCompiler().compile('lib', dartDevCOutputDir);
 }
 

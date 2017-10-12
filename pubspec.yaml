@@ -1,6 +1,6 @@
 name: uuid
 description: IETF UUIDs (primarily Version 4)
-version: 0.6.3
+version: 0.6.5
 
 author: Jim Philbin <mailto:jfphilbin@gmail.com>
 
@@ -12,10 +12,10 @@ environment:
 dependencies:
   string:
     path: C:/odw/sdk/string
-    version: ^0.6.3
+    version: ^0.6.5
   system:
     path: C:/odw/sdk/system
-    version: ^0.6.3
+    version: ^0.6.5
 
 
 dev_dependencies:

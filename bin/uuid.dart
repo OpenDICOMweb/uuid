@@ -32,7 +32,7 @@ void checkUuid(Uuid uuid) {
   final t = uuid1.toString();
   if (s != t) log.debug('$s != $t');
   if (!uuid1.isValid) log.debug('**** Uuid0: $uuid');
-  if (uuid != uuid1) throw 'Uuid $uuid != $uuid1';
+  if (uuid != uuid1) throw new UuidError('Uuid $uuid != $uuid1');
   if (s.length != 36) log.debug('invalid length ${s.length} in $s');
   if (s[14] != '4') log.debug('No 4 at Byte 6 (${s[14]} in Uuid: $uuid');
   if (!'89AaBb'.contains(s[19]))
