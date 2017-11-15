@@ -41,16 +41,16 @@ class Uuid {
   /// A random V4 UUID generator.
   static V4Generator generator = V4Generator.secure;
 
-  /// If [true] uppercase letters will be used when converting
+  /// If _true_ uppercase letters will be used when converting
   /// [Uuid]s to [String]s; otherwise lowercase will be used.
   static bool useUppercase = false;
 
   /// The 16 bytes of UUID data.
   final Uint8List data;
 
-  /// Constructs a Version 4 [Uuid]. If [isSecure] is [false],
-  /// it uses the [Random] RNG.  If [isSecure] is [true], it uses
-  /// the [Random.secure] RNG. The default is isSecure is [true].
+  /// Constructs a Version 4 [Uuid]. If [isSecure] is _false_,
+  /// it uses the [Random] RNG.  If [isSecure] is _true_, it uses
+  /// the [Random.secure] RNG. The default is isSecure is _true_.
   Uuid() : data = generator.next;
 
   Uuid.pseudo() : data = V4Generator.pseudo.next;
@@ -79,7 +79,7 @@ class Uuid {
   @override
   int get hashCode => data.hashCode;
 
-  /// Returns [true] if [this] is a valid Version 4 UUID, false otherwise.
+  /// Returns _true_ if _this_ is a valid Version 4 UUID, false otherwise.
   bool get isValid => _isValidV4List(data);
 
   /// Returns a copy of [data].
@@ -88,7 +88,7 @@ class Uuid {
   /// Returns the [Uuid] as a [String] in UUID format.
   String get asString => toString();
 
-  /// Returns a hexadecimal [String] corresponding to [this], but without
+  /// Returns a hexadecimal [String] corresponding to _this_, but without
   /// the dashes ('-') that are present in the UUID format.
   String get asHex {
     final sb = new StringBuffer();
@@ -97,7 +97,7 @@ class Uuid {
     return sb.toString();
   }
 
-  /// Returns the version number of [this].
+  /// Returns the version number of _this_.
   int get version => data[6] >> 4;
 
   /// Returns true if this is a random or pseudo-random [Uuid].
@@ -111,9 +111,9 @@ class Uuid {
     return UuidVariant.microsoft;
   }
 
-  /// Returns the [Uuid] [String] that corresponds to [this].  By default,
+  /// Returns the [Uuid] [String] that corresponds to _this_.  By default,
   /// the hexadecimal characters are in lowercase; however, if
-  /// [useUppercase] is [true] the returned [String] is in uppercase.
+  /// [useUppercase] is _true_ the returned [String] is in uppercase.
   @override
   String toString() => _toUuidFormat(data);
 
@@ -142,29 +142,29 @@ class Uuid {
   static String get generateSecureDcmString =>
       _toUidString(V4Generator.secure.next);
 
-  /// Returns [true] if a secure [Random] number generator is being used.
+  /// Returns _true_ if a secure [Random] number generator is being used.
   static bool get isSecure => generator.isSecure;
 
   /// Returns the integer [seed] provided to the pseudo (non-secure)
   /// random number generator.
   static int get seed => generator.seed;
 
-  /// Returns [true] if [s] is a valid [Uuid] for [version]. If
-  /// [version] is [null] returns [true] for any valid version.
+  /// Returns _true_ if [s] is a valid [Uuid] for [version]. If
+  /// [version] is _null_ returns _true_ for any valid version.
   static bool isValidString(String s, [int version]) => isValidUuidString(s, version);
 
   static bool isNotValidString(String s, [int version]) => !isValidString(s, version);
 
-  /// Returns [true] if [data] is a valid [Uuid] for [version]. If
-  /// [version] is [null] returns [true] for any valid version.
+  /// Returns _true_ if [data] is a valid [Uuid] for [version]. If
+  /// [version] is _null_ returns _true_ for any valid version.
   static bool isValidData(List<int> data, [int version]) => _isValidUuid(data, version);
 
   static bool isNotValidData(List<int> data, [int version]) =>
       !isValidData(data, version);
 
   /// Returns a Uuid created from [s], if [s] is in valid Uuid format;
-  /// otherwise, if [onError] is not [null] calls [onError]([s])
-  /// and returns its value. If [onError] is [null], then a
+  /// otherwise, if [onError] is not _null_ calls [onError]([s])
+  /// and returns its value. If [onError] is _null_, then a
   /// [InvalidUuidListError] is thrown.
   static Uuid parse(String s, {Uint8List data, OnUuidParseError onError}) {
     final bytes = _parseToBytes(s, data, (s) => null, kUuidStringLength);
@@ -261,8 +261,8 @@ Uint8List _parseToBytes(
   return bytes;
 }
 
-/// Returns a valid [Uuid] data buffer. If [bytes] is [null] a new
-/// data buffer is created. If [bytes] is not [null] and has length
+/// Returns a valid [Uuid] data buffer. If [bytes] is _null_ a new
+/// data buffer is created. If [bytes] is not _null_ and has length
 /// 16, it is returned; otherwise, [invalidUuidListError] is called.
 Uint8List _getDataBuffer(List<int> bytes) {
   if (bytes == null) return new Uint8List(16);
