@@ -1,6 +1,6 @@
 name: uuid
 description: IETF UUIDs (primarily Version 4)
-version: 0.6.5
+version: 0.6.6
 
 author: Jim Philbin <mailto:jfphilbin@gmail.com>
 
