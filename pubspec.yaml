@@ -9,6 +9,7 @@ homepage: https://github.com/OpenDICOMweb/uuid
 environment:
     sdk: '>=1.24.2 <2.1.0'
 
+# TODO: explore removing the dependency on system
 dependencies:
   system:
     path: C:/odw/sdk/system
