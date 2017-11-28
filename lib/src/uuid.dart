@@ -4,11 +4,10 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:string/string.dart';
+//import 'package:string/string.dart';
 import 'package:system/core.dart';
 
 import 'errors.dart';
@@ -21,6 +20,33 @@ typedef Uint8List OnUuidParseToBytesError(String s);
 enum UuidVariant { ncs, rfc4122, microsoft, reserved }
 
 enum GeneratorType { secure, pseudo, seededPseudo }
+
+// Uuid constants
+const int kUuidStringLength = 36;
+const int kUuidAsUidStringLength = 32;
+
+// Regular expression used for basic parsing of the uuid.
+const String pattern =
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-4][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$';
+
+// General pattern is:
+//   xxxxxxxx-xxxx-Vxxx-Nxxx-xxxxxxxxxxxx
+//   dashes |8   |13  |18  |23
+// where V is version, and N is node.
+
+/// The offsets of the 4 dashes in a UUID [String}.
+const List<int> kDashes = const <int>[8, 13, 18, 23];
+
+/// The offsets of the start of the hex values in a UUID [String].
+const List<int> kStarts = const <int>[0, 9, 14, 19, 24];
+
+/// The offsets of the end of the hex values in a UUID [String].
+const List<int> kEnds = const <int>[8, 13, 18, 23, kUuidStringLength];
+
+/// The ASCII value for the dash (-) character.
+const int kDash = 0x2D;
+
+const List<int> _kISOVariantAsLetter = const <int>[k8, k9, ka, kb];
 
 // Note: This implementation is faster than http:pub.dartlang.org/uuid
 //   this one: Template(RunTime): 2101.890756302521 us.
@@ -49,8 +75,8 @@ class Uuid {
   final Uint8List data;
 
   /// Constructs a Version 4 [Uuid]. If [isSecure] is _false_,
-  /// it uses the [Random] RNG.  If [isSecure] is _true_, it uses
-  /// the [Random.secure] RNG. The default is isSecure is _true_.
+  /// it uses the Random RNG.  If [isSecure] is _true_, it uses
+  /// the Random.secure RNG. The default is isSecure is _true_.
   Uuid() : data = generator.next;
 
   Uuid.pseudo() : data = V4Generator.pseudo.next;
@@ -142,7 +168,7 @@ class Uuid {
   static String get generateSecureDcmString =>
       _toUidString(V4Generator.secure.next);
 
-  /// Returns _true_ if a secure [Random] number generator is being used.
+  /// Returns _true_ if a secure (_Random.secure_) random number generator is being used.
   static bool get isSecure => generator.isSecure;
 
   /// Returns the integer [seed] provided to the pseudo (non-secure)
@@ -151,7 +177,44 @@ class Uuid {
 
   /// Returns _true_ if [s] is a valid [Uuid] for [version]. If
   /// [version] is _null_ returns _true_ for any valid version.
-  static bool isValidString(String s, [int version]) => isValidUuidString(s, version);
+  static bool isValidString(String s, [int version]) =>
+      isValidUuidString(s, version);
+
+  // Returns _true_ if [uuidString] is a valid [Uuid]. If [type] is _null_
+  /// it just validates the format; otherwise, [type] must have a value
+  /// between 1 and 5.
+  static bool isValidUuidString(String uuidString, [int type]) {
+    if (uuidString.length != kUuidStringLength) return false;
+    for (var pos in kDashes) if (uuidString.codeUnitAt(pos) != kDash) return false;
+    final s = uuidString.toLowerCase();
+    for (var i = 0; i < kStarts.length; i++) {
+      final start = kStarts[i];
+      final end = kEnds[i];
+      for (var j = start; j < end; j++) {
+        final c = s.codeUnitAt(j);
+        if (!isHexChar(c)) return false;
+      }
+    }
+    return (type == null) ? true : _isValidStringVersion(s, type);
+  }
+
+  /// Returns _true_
+  static bool _isValidStringVersion(String s, int version) {
+    if (version < 1 || version > 5) invalidUuidString('Invalid version number: $version');
+    final _version = _getVersionNumberFromString(s);
+    if (!_isISOVariantFromString(s) || _version != version) return false;
+    // For certain versions, the checks we did up to this point are fine.
+    if (_version != 3 || _version != 5) return true;
+    throw new UnimplementedError('Version 3 & 5 are not yet implemented');
+  }
+
+  static int _getVersionNumberFromString(String s) => s.codeUnitAt(14) - k0;
+
+  static bool _isISOVariantFromString(String s) {
+    final subType = s.codeUnitAt(19);
+    return _kISOVariantAsLetter.contains(subType);
+  }
+
 
   static bool isNotValidString(String s, [int version]) => !isValidString(s, version);
 
@@ -255,8 +318,8 @@ Uint8List _parseToBytes(
     } else {
       return invalidUuidStringLengthError(s, targetLength);
     }
-  } on UuidParseError catch(e) {
-    return invalidUuidCharacterError(s, e.msg);
+  } on UuidParseError {
+    return invalidUuidCharacterError(s);
   }
   return bytes;
 }
@@ -403,3 +466,21 @@ const Map<String, int> _hexToByte = const {
   'f6': 246, 'f7': 247, 'f8': 248, 'f9': 249, 'fa': 250, 'fb': 251,
   'fc': 252, 'fd': 253, 'fe': 254, 'ff': 255
 };
+
+/// An invalid [Uuid] [String] [Error].
+class InvalidUuidStringError extends Error {
+  String msg;
+  InvalidUuidStringError(this.msg);
+
+  @override
+  String toString() => _msg(msg);
+
+  static String _msg(String s) => 'InvalidUuidStringError: "$s"';
+}
+
+Null invalidUuidString(String msg, [Issues issues]) {
+  log.error(InvalidUuidStringError._msg(msg));
+  if (issues != null) issues.add(msg);
+  if (throwOnError) throw new InvalidUuidStringError('$msg');
+  return null;
+}
