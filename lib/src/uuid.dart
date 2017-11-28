@@ -175,27 +175,22 @@ class Uuid {
   /// random number generator.
   static int get seed => generator.seed;
 
-  /// Returns _true_ if [s] is a valid [Uuid] for [version]. If
-  /// [version] is _null_ returns _true_ for any valid version.
-  static bool isValidString(String s, [int version]) =>
-      isValidUuidString(s, version);
-
-  // Returns _true_ if [uuidString] is a valid [Uuid]. If [type] is _null_
-  /// it just validates the format; otherwise, [type] must have a value
+  // Returns _true_ if [s] is a valid [Uuid] [String]. If [version] is _null_
+  /// it just validates the format; otherwise, [version] must have a value
   /// between 1 and 5.
-  static bool isValidUuidString(String uuidString, [int type]) {
-    if (uuidString.length != kUuidStringLength) return false;
-    for (var pos in kDashes) if (uuidString.codeUnitAt(pos) != kDash) return false;
-    final s = uuidString.toLowerCase();
+  static bool isValidString(String s, [int version]) {
+    if (s.length != kUuidStringLength) return false;
+    for (var pos in kDashes) if (s.codeUnitAt(pos) != kDash) return false;
+    final lc = s.toLowerCase();
     for (var i = 0; i < kStarts.length; i++) {
       final start = kStarts[i];
       final end = kEnds[i];
       for (var j = start; j < end; j++) {
-        final c = s.codeUnitAt(j);
+        final c = lc.codeUnitAt(j);
         if (!isHexChar(c)) return false;
       }
     }
-    return (type == null) ? true : _isValidStringVersion(s, type);
+    return (version == null) ? true : _isValidStringVersion(lc, version);
   }
 
   /// Returns _true_
