@@ -13,7 +13,7 @@ import 'package:grinder/grinder.dart';
 /// The entry point for grind.dart.
 Future main(List<String> args) => grind(args);
 
-/// If [true] some of the tests (notably) [unittest] run asynchronously.
+/// If _true_ some of the tests (notably) [unittest] run asynchronously.
 bool runAsync = false;
 
 /// Default task - runs if no arguments are given to grind.
