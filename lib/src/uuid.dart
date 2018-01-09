@@ -7,7 +7,7 @@
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:system/core.dart';
+//import 'package:system/core.dart';
 
 import 'errors.dart';
 import 'v4generator.dart';

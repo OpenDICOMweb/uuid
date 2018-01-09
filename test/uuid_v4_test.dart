@@ -4,8 +4,8 @@
 // Author: Jim Philbin <jfphilbin@gmail.edu>
 // See the AUTHORS file for other contributors.
 
-import 'package:system/system.dart';
-import 'package:system/server.dart';
+//import 'package:system/system.dart';
+//import 'package:system/server.dart';
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,12 +14,12 @@ import 'data.dart';
 //TODO: generalize this package to use: uuid_pseudo, uuid_secure, uuid_w_seed
 
 void main() {
-  Server.initialize(name: 'uuid_v4_test', level: Level.info0);
+//  Server.initialize(name: 'uuid_v4_test', level: Level.info0);
 
   group('Version 4 Tests', () {
     test('Check if V4 is consistent using a seed', () {
       final uuid0 = new Uuid.seededPseudo();
-      log..debug('uuid0: $uuid0')..debug('data0: $data0');
+  //    log..debug('uuid0: $uuid0')..debug('data0: $data0');
 
       expect(uuid0.data.length, equals(16));
       expect(uuid0, equals(uuidD0));
@@ -33,17 +33,17 @@ void main() {
       ];
       const string0 = '109156be-c4fb-41ea-b1b4-efe1671c5836';
 
-      log.debug('data0: $data0');
+  //    log.debug('data0: $data0');
       final uuid0 = new Uuid.fromList(data0, coerce: true);
 
-      log..debug('  uuid0: $uuid0')..debug('string0: $string0');
+  //    log..debug('  uuid0: $uuid0')..debug('string0: $string0');
       expect(uuid0.toString(), equals(string0));
     });
 
     test('Make sure that really fast uuid.v4 doesn\'t produce duplicates', () {
       final list = new List.filled(1000, null).map((something) => new Uuid()).toList();
       final setList = list.toSet();
-      log.debug('setList:$setList');
+  //    log.debug('setList:$setList');
       expect(list.length, equals(setList.length));
     });
   });
@@ -56,7 +56,7 @@ void main() {
       //           --------------^---------------------
 
       final uuid = Uuid.parse(s0, onError: (id) => null);
-      log..debug('  s0: $s0')..debug('uuid: ${uuid.asString}')..debug('  s1: $s1');
+  //    log..debug('  s0: $s0')..debug('uuid: ${uuid.asString}')..debug('  s1: $s1');
       expect(uuid.toString(), equals(s1));
     });
   });

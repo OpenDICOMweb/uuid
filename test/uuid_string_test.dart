@@ -8,7 +8,7 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
-import 'package:system/server.dart';
+//import 'package:system/server.dart';
 import 'data.dart';
 
 const String uuidV1 = '23d57c30-afe7-11e4-ab7d-12e3f512a338';
@@ -22,17 +22,17 @@ const List<int> uuidList = const <int>[
 final Uint8List uuidBytes = new Uint8List.fromList(uuidList);
 
 void main() {
-  Server.initialize(name: 'uuid_string_test', level: Level.info0);
+//  Server.initialize(name: 'uuid_string_test', level: Level.info0);
   group('Uuid Tests', () {
     // The data in this test is in data.dart
     test('Uuid Test with seed', () {
-      log.debug('seed: ${Uuid.seed}');
+  //    log.debug('seed: ${Uuid.seed}');
       final uuid0 = new Uuid.seededPseudo();
-      log.debug('Uuid: $uuid0');
+  //    log.debug('Uuid: $uuid0');
       expect(uuid0.asString, equals(s0));
 
       final uuid1 = new Uuid.seededPseudo();
-      log.debug('Uuid: $uuid1');
+  //    log.debug('Uuid: $uuid1');
       expect(uuid1.asString, equals(s1));
     });
 
@@ -51,12 +51,12 @@ void main() {
       //denies if wrong version
       expect(Uuid.isValidString(uuidV1, 4), false);
 
-      log..debug(uuidList)..debug(uuidBytes);
+  //    log..debug(uuidList)..debug(uuidBytes);
       expect(uuidList != uuidBytes, true);
 
       //accepts valid List
       var uuid = new Uuid.fromList(uuidList);
-      log.debug('uuidList uuid: $uuid');
+  //    log.debug('uuidList uuid: $uuid');
       expect(Uuid.isValidString(uuid.asString), true);
 
       //accepts valid Uint8List
@@ -73,15 +73,15 @@ void main() {
 
     /*test("UUid", (){
       Uuid uuid0 = new Uuid('6ba7b810-9dad-41d1-80b4-00c04fd430c8');
-      log.debug(uuid0.bytes);
-      log.debug(uuid0.isValid);//check once
+  //    log.debug(uuid0.bytes);
+  //    log.debug(uuid0.isValid);//check once
     });
     test("parse", () {
       String uuid0 = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
       Uuid uuid2 = Uuid.parse(uuid0);
       Uuid uuid3 = new Uuid('6ba7b810-9dad-41d1-80b4-00c04fd430c8');
-      log.debug('Uuid.parse: ${uuid2}, uuid0: $uuid0');
-      log.debug('uuid2.bytes: ${uuid2.bytes}, uuid3.bytes: ${uuid3.bytes}');
+  //    log.debug('Uuid.parse: ${uuid2}, uuid0: $uuid0');
+  //    log.debug('uuid2.bytes: ${uuid2.bytes}, uuid3.bytes: ${uuid3.bytes}');
     });
     test("isNotValidString", (){
 
@@ -104,7 +104,7 @@ void main() {
       ];
       //log.debug(Uuid.isValidData(uuidList, 1));
       //expect(Uuid.isValidData(uuidList, 1),true);
-      log.debug(Uuid.initialize(seed: 16));
+  //    log.debug(Uuid.initialize(seed: 16));
     });
 
     test(" == and hashCode ", (){
@@ -123,7 +123,7 @@ void main() {
 
       //hashCode
       //expect(uuid0.hashCode, equals(uuid1.hashCode));
-      log.debug(uuid0.isSecure);
+  //    log.debug(uuid0.isSecure);
       //expect(uuid0.asHex, equals(uuidV1.replaceAll("-", "")));
       expect(uuid0.variant,equals(UuidVariant.rfc4122));
 
